@@ -8,6 +8,8 @@ Versions
 4.0
 ---
 
+*2020*
+
 The goal of SeedLink v4 is to unify and standardize the extensions
 added since v3.1, and to define new protocol extensions to allow for
 support of a new version of miniSEED and FDSN identifiers.
@@ -16,17 +18,34 @@ SeedLink v4 is designed to be compatible with v3 -- any v3 client can
 connect to v4 server (albeit missing the new features) and any v4
 client can connect to v3 server.
 
+* Add X
+* Add Y
+
 3.1
 ---
 
-~ 2010
+*2010*
 
-* Addition of <feature X>
-* Addition of <feature Y>
+* Add BATCH command to disable otherwise requires respones to modifier
+  commands.  Reduces negotiation messages, speeding up negotiations.
 
 3.0
 ---
 
-~ 2003
+*~2003*
 
-* Addition of <feature W>
+2.93
+----
+
+* Allow packet time to be included with a stream sequence number.
+
+2.92
+----
+
+* Add TIME command for time windowed request
+* Add INFO requests
+
+2.5
+---
+
+* Support multi-station protocol mode
