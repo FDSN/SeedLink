@@ -1,5 +1,7 @@
 .. SeedLink documentation master file
 
+.. _protocol:
+
 Protocol
 ========
 
