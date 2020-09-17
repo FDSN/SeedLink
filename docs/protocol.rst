@@ -66,7 +66,7 @@ handshaking is shown in :ref:`seedlink-handshaking`.
 .. _seedlink-handshaking:
 
 .. figure::  Handshaking_flowchart.svg
-   
+
    Handshaking flowchart
 
 Example v3 handshaking
@@ -138,7 +138,7 @@ Sequence numbers may contain gaps (eg., if some packets have been lost or
 filtered out).  In this case the first packet is not necessarily the one
 requested, but the nearest packet (not older than requested) that matches the
 selectors. Sequence numbers wrap around when the maximum sequence number (eg.,
-2^24-1 in legacy data mode) has been reached. 
+2^24-1 in legacy data mode) has been reached.
 
 When the server has sent all available data, the server sends new data as soon
 as it arrives ("real-time mode") or appends ASCII string "END" to the last
@@ -146,14 +146,14 @@ packet and waits for the client to close connection ("dial-up mode"). Due to
 signature "SL" or "SE", A SeedLink packet can never start with "END", so there
 is no ambiguity.
 
-.. _seedlink_commands:
+.. _seedlink-commands:
 
 Commands
 --------
 
 HELLO
     responds with a two-line message (both lines terminated with <cr><lf>). The first line contains the name and version of the SeedLink server (not protocol version) and capabilities of the server; the second  line contains station or data center description specified in the configuration. Handshaking typically starts with HELLO, but using HELLO is not mandatory.
-   
+
 CAT
     shows the station list. Used mainly for testing a SeedLink server with "telnet".
 
@@ -162,19 +162,19 @@ BYE
 
 USER name password {CAP:USER} |4|
     simple authentication as an alternative to IP-based ACL. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR" if authentication failed or command not supported. In any case, access to non-restricted stations is guaranteed. For security reasons, USER should be used with encrypted (SSL) connections only.
-    
+
 AUTH token {CAP:AUTH} |4|
     reserved for token authentication.
 
 ACCEPT format_list |4|
     enables extended data mode. format_list is a space separated list of formats accepted by the client. Each element of the list is a number from 0 to 255. Some data may be available in multiple alternative formats; in this case, format_list should be interpreted as having decreasing priority and only data in the highest priority format should be sent to client.
-    
+
 ENABLE capability_list {CAP:CAP} |4|
     enables additional capabilities of the server
-    
+
 CAPABILITIES capability_list {CAP:CAP}
     same as ENABLE
-    
+
 STATION station_code [network_code] {CAP:MULTISTATION}
     enables multi-station mode, which is used to transfer data of multiple stations over a single TCP connection. The STATION command, followed by SELECT (optional) and FETCH, DATA or TIME commands is repeated for each station and the handshaking is finished with END. STATION responds with "OK" on success, "ERROR" otherwise (eg., if the station is not found or multi-station mode is not supported by the server).
 
@@ -183,7 +183,7 @@ STATION station_code [network_code] {CAP:MULTISTATION}
     If the network code is omitted, default network code is used for backwards compatibility.
 
     Some servers may support wildcard "\*" in station_code and network_code {CAP:NSWILDCARD}. In this case, the following SELECT, DATA, FETCH and TIME command will be implicitly repeated for all matching stations that are not requested explicitly, including stations that are added to the server in future. Sequence number must not be used unless the server supports {CAP:NSWILDCARDSEQ}.
-   
+
 END {CAP:MULTISTATION}
     end of handshaking in multi-station mode. No explicit response is sent.
 
@@ -191,7 +191,7 @@ SELECT [pattern]
     when used without pattern, all selectors are canceled. Otherwise, the pattern is a positive selector to enable matching miniSEED stream transfer. The pattern can be used as well as a negative selector with a leading "!" to prevent the transfer of some miniSEED streams. Only one selector can be used in a single SELECT request. A SeedLink packet is sent to the client if it matches any positive selector and doesn’t match any negative selectors.
 
     Format of the pattern is LL:CCC.T |4|, where LL is location, CCC is channel, and T is type (one of DECOTL for data, event, calibration, blockette, timing, and log records). "LL", ".T", and "LL:CCC." can be omitted, meaning "any". If the location code is exactly 2 characters and channel code is exactly 3 characters, then ":" should be omitted, because it may not be supported by all servers. Supported wildcard is "?". "-" stands for space (eg., "--" can be used to denote empty location code), but may not be supported by all servers.
-   
+
     SELECT responds with "OK" on success, "ERROR" otherwise.
 
 DATA [seq [begin_time [end_time]]]
@@ -209,7 +209,7 @@ TIME [begin_time [end_time]] {CAP:TIME}
 
 INFO level {CAP:INFO}
     requests an INFO packet containing XML data embedded in a miniSEED log record. level should be one of the following: ID, CAPABILITIES, STATIONS, STREAMS, GAPS, CONNECTIONS, ALL. The XML document conforms to the Document Type Definition (DTD) shown in section ???. The amount of info available depends on the configuration of the SeedLink server.
-    
+
 GET arg {CAP:WEBSOCKET}
     HTTP GET, when used as the very first command, switches to WebSocket encapsulation. Argument is ignored.
 
@@ -237,11 +237,11 @@ V4 capabilities
 
 SLPROTO:#.#
     SeedLink protocol version.
-    
+
 WEBSOCKET:#
     WebSocket protocol version. This implies that WebSocket shares the same port
     with native SeedLink protocol.
-    
+
 CAP
     ENABLE/CAPABILITIES command.
 
@@ -254,10 +254,10 @@ NSWILDCARD
 
 NSWILDCARDSEQ |4|
     Sequence numbers in combination with wildcards. Implies NSWILDCARD.
-    
+
 BATCH
     Batch handshaking.
-    
+
 ASYNC |4|
     Asynchronous handshaking.
 
@@ -266,10 +266,10 @@ USER |4|
 
 AUTH |4|
     Token authentication (AUTH command).
-    
+
 MULTISTATION
     Multi-station mode (STATION command).
-    
+
 TIME
     TIME and start_time of DATA/FETCH (1 second resolution). Same as
     "window-extraction" in SeedLink 3.x.
@@ -277,7 +277,7 @@ TIME
 INFO\:level
     INFO level, where level is "ID", "CAPABILITIES", "STATIONS", "STREAMS",
     "GAPS", "CONNECTIONS", "ALL".
-    
+
 The following additional features are supported if the server implements
 {CAP:SLPROTO:4.0}:
 
@@ -294,13 +294,13 @@ Legacy capabilities
 
 dialup
     Dial-up mode (FETCH command)
-    
+
 multistation
     Multi-station mode (STATION command)
-    
+
 window-extraction
     TIME and start_time of DATA/FETCH
-    
+
 info\:level
     INFO level, where level is "id", "capabilities", "stations", "streams",
     "gaps", "connections", "all".

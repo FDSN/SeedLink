@@ -24,7 +24,7 @@ author = 'FDSN'
 
 # The full version, including alpha/beta/rc tags
 release = '4.0.0'
-version = '4.0.0'
+version = '4.0.0 DRAFT'
 
 # -- General configuration ---------------------------------------------------
 
@@ -78,7 +78,7 @@ html_js_files = [
 ]
 
 # Mark as draft, disable for releases
-sphinxmark_enable = False
+sphinxmark_enable = True
 
 # Sphinxmark options, 'document' is the div for the RTD theme body
 sphinxmark_div = 'document'
