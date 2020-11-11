@@ -18,8 +18,14 @@ SeedLink v4 is designed to be compatible with v3 -- any v3 client can
 connect to v4 server (albeit missing the new features) and any v4
 client can connect to v3 server.
 
-* Add X
-* Add Y
+Planned new features include:
+
+* Support for multiple type data types beyond miniSEED 2.
+* Variable record length.
+* Network and station wildcards.
+* Extended DATA/FETCH/TIME commands to make time-windowed requests resumable.
+* Extended time resolution (up to nanoseconds).
+* User ID and token-based authentication with SSL support for accessing restricted data.
 
 3.1
 ---
