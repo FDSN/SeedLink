@@ -130,7 +130,31 @@ the letters "SL" followed by a six-digit hexadecimal packet sequence number.
 In extended data mode |4|, enabled by the ACCEPT command, each packet consists
 of 11-byte SeedLink header, followed by variable length data. The SeedLink
 header consists of the letters "SE" followed by data format code (1 byte) and
-binary, 64-bit, little-endian sequence number (8 bytes).
+binary, 64-bit, little-endian sequence number (8 bytes). This is illustrated
+by the table below.
+
++-------------------------------------------+----------------------------------------------------------------------+
+| Standard format                           | Extended format                                                      |
++===========================================+======================================================================+
+| “SL”                                      | “SE”                                                                 |
++-------------------------------------------+----------------------------------------------------------------------+
+|                                           | Data format code (1 byte)                                            |
++-------------------------------------------+----------------------------------------------------------------------+
+| ASCII sequence number (6 bytes / 24 bits) | Binary sequence number (8 bytes / 64 bits), little-endian            |
++-------------------------------------------+----------------------------------------------------------------------+
+| 512 bytes data                            | Variable length data                                                 |
++-------------------------------------------+----------------------------------------------------------------------+
+
+The following data format codes have been reserved:
+
+50 (ASCII "2")
+  MiniSEED 2.x
+
+51 (ASCII "3")
+  MiniSEED 3.x
+  
+In order to receive data in those formats, 50 and/or 51 should be used as
+argument(s) to the ACCESS command.
 
 A SeedLink server that receives data from another SeedLink server may re-assign
 sequence numbers for technical reasons. It is generally not possible to use the
@@ -162,11 +186,8 @@ CAT
 BYE
     closes the connection. Used mainly for testing a SeedLink server with "telnet".
 
-USER name password {CAP:USER} |4|
-    simple authentication as an alternative to IP-based ACL. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR" if authentication failed or command not supported. In any case, access to non-restricted stations is guaranteed. For security reasons, USER should be used with encrypted (SSL) connections only.
-
-AUTH token {CAP:AUTH} |4|
-    reserved for token authentication.
+AUTH type argument_list {CAP:AUTH} |4|
+    authentication as an alternative to IP-based ACL. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR" if authentication failed or command not supported. In any case, access to non-restricted stations is granted. Type can be TOKEN or USERPASS, possibly more in the future.
 
 ACCEPT format_list |4|
     enables extended data mode. format_list is a space separated list of formats accepted by the client. Each element of the list is a number from 0 to 255. Some data may be available in multiple alternative formats; in this case, format_list should be interpreted as having decreasing priority and only data in the highest priority format should be sent to client.
@@ -263,11 +284,8 @@ BATCH
 ASYNC |4|
     Asynchronous handshaking.
 
-USER |4|
-    Basic authentication (USER command).
-
-AUTH |4|
-    Token authentication (AUTH command).
+AUTH\:type |4|
+    Authentication (AUTH command).
 
 MULTISTATION
     Multi-station mode (STATION command).
