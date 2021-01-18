@@ -77,7 +77,7 @@ Example v3 handshaking
 ::
 
     > HELLO\r\n
-    < MySeedLink v1.0\r\n
+    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0 CAP GETCAP\r\n
     < GEOFON\r\n
     > BATCH\r\n
     < ERROR\r\n
@@ -101,9 +101,13 @@ Example v4 handshaking (async)
 ::
 
     > HELLO\r\n
-    < MySeedLink v1.0 :: SLPROTO:4.0 WEBSOCKET:13 ASYNC MULTISTATION TIME INFO:ID INFO:CAPABILITIES INFO:STATIONS INFO:STREAMS\r\n
+    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0 CAP GETCAP\r\n
     < GEOFON\r\n
-    > ACCEPT 3 2\r\n
+    > USERAGENT slinktool/4.3 (libslink/2020.046)\r\n
+    < OK\r\n
+    > GETCAPABILITIES\r\n
+    < SLPROTO:4.0 WEBSOCKET:13 ASYNC MULTISTATION TIME INFO:ID INFO:CAPABILITIES INFO:STATIONS INFO:STREAMS\r\n
+    > ACCEPT 51 50\r\n
     < OK\r\n
     > STATION APE GE\r\n
     > SELECT 00:BH?.D\r\n
@@ -128,10 +132,11 @@ legacy data mode, each packet consists of 8-byte SeedLink header followed by a
 the letters "SL" followed by a six-digit hexadecimal packet sequence number.
 
 In extended data mode |4|, enabled by the ACCEPT command, each packet consists
-of 11-byte SeedLink header, followed by variable length data. The SeedLink
-header consists of the letters "SE" followed by data format code (1 byte) and
-binary, 64-bit, little-endian sequence number (8 bytes). This is illustrated
-by the table below.
+of 16-byte SeedLink header, followed by variable length data. The SeedLink
+header consists of the letters "SE" followed by data format code (1 byte),
+reserved byte, binary, 32-bit, little-endian length of the following data (4
+bytes), and binary, 64-bit, little-endian sequence number (8 bytes). This is
+illustrated by the table below.
 
 +-------------------------------------------+----------------------------------------------------------------------+
 | Standard format                           | Extended format                                                      |
@@ -139,6 +144,10 @@ by the table below.
 | “SL”                                      | “SE”                                                                 |
 +-------------------------------------------+----------------------------------------------------------------------+
 |                                           | Data format code (1 byte)                                            |
++-------------------------------------------+----------------------------------------------------------------------+
+|                                           | Reserved byte (1 byte)                                               |
++-------------------------------------------+----------------------------------------------------------------------+
+|                                           | Binary length (4 bytes / 32 bits), little-endian                     |
 +-------------------------------------------+----------------------------------------------------------------------+
 | ASCII sequence number (6 bytes / 24 bits) | Binary sequence number (8 bytes / 64 bits), little-endian            |
 +-------------------------------------------+----------------------------------------------------------------------+
@@ -153,7 +162,10 @@ The following data format codes have been reserved:
 51 (ASCII "3")
   MiniSEED 3.x
   
-In order to receive data in those formats, 50 and/or 51 should be used as
+73 (ASCII "I")
+  INFO packets (XML or JSON?)
+
+In order to receive data in those formats, 50, 51 and/or 73 must be used as
 argument(s) to the ACCESS command.
 
 A SeedLink server that receives data from another SeedLink server may re-assign
@@ -178,7 +190,10 @@ Commands
 --------
 
 HELLO
-    responds with a two-line message (both lines terminated with <cr><lf>). The first line contains the name and version of the SeedLink server (not protocol version) and capabilities of the server; the second  line contains station or data center description specified in the configuration. Handshaking typically starts with HELLO, but using HELLO is not mandatory.
+    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line should be structured as ``SeedLink v4.0 (implementation) :: SLPROTO:4.0 CAP GETCAP``, where "v4.0" is protocol version and "implementation" is software implementation and version, such as "MySeedLink v1.0". The second line contains station or data center description specified in the configuration. Handshaking typically starts with HELLO, but using HELLO is not mandatory.
+    
+USERAGENT program/version (library/version)
+    optionally identifies client software used. Argument is free string, but it is recommended to use given format, for example ``USERAGENT slinktool/4.3 (libslink/2020.046)``. The command has no effect on functionality, but helps with logging and statistics on the server side.
 
 CAT
     shows the station list. Used mainly for testing a SeedLink server with "telnet".
@@ -189,14 +204,17 @@ BYE
 AUTH type argument_list {CAP:AUTH} |4|
     authentication as an alternative to IP-based ACL. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR" if authentication failed or command not supported. In any case, access to non-restricted stations is granted. Type can be TOKEN or USERPASS, possibly more in the future.
 
-ACCEPT format_list |4|
-    enables extended data mode. format_list is a space separated list of formats accepted by the client. Each element of the list is a number from 0 to 255. Some data may be available in multiple alternative formats; in this case, format_list should be interpreted as having decreasing priority and only data in the highest priority format should be sent to client.
+ACCEPT format_list | * |4|
+    enables extended data mode. format_list is a space separated list of formats accepted by the client. Each element of the list is a number from 1 to 255. Some data may be available in multiple alternative formats; in this case, format_list should be interpreted as having decreasing priority and only data in the highest priority format should be sent to client. ``ACCEPT *`` tells the server that all formats are accepted.
 
-ENABLE capability_list {CAP:CAP} |4|
-    enables additional capabilities of the server
+ENABLE capability |4|
+    enables additional capabilities of the server. Only EXTREPLY can be enabled in the current version of the protocol.
 
 CAPABILITIES capability_list {CAP:CAP}
-    same as ENABLE
+    specifies capabilities supported by the client. Equivalent of ENABLE when EXTREPLY is included, other capabilities have no effect. This command is included for backwards compatibility.
+
+GETCAPABILITIES
+    returns space-separated server capabilities as a single line.
 
 STATION station_code [network_code] {CAP:MULTISTATION}
     enables multi-station mode, which is used to transfer data of multiple stations over a single TCP connection. The STATION command, followed by SELECT (optional) and FETCH, DATA or TIME commands is repeated for each station and the handshaking is finished with END. STATION responds with "OK" on success, "ERROR" otherwise (eg., if the station is not found or multi-station mode is not supported by the server).
