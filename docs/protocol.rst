@@ -50,9 +50,9 @@ the server, the client should not send any further commands before it has
 received a response to the previous modifier command.
 
 In case of batch handshaking {CAP:BATCH}, triggered by the BATCH command,
-responses to modifier commands are not sent. In this case, errors will be
-silently ignored. Using BATCH is generally not recommended, unless talking to a
-known server implementation.
+responses to STATION, SELECT, DATA, FETCH, TIME and CAPABILITIES commands will
+not be sent. In this case, errors will be silently ignored. Using BATCH is
+generally not recommended, unless talking to a known server implementation.
 
 The client should check server's response to the BATCH command itself as
 usual -- if the response is ERROR, then batch mode is not supported by the
@@ -201,6 +201,9 @@ CAT
 BYE
     closes the connection. Used mainly for testing a SeedLink server with "telnet".
 
+BATCH
+    supresses output of STATION, SELECT, DATA, FETCH, TIME and CAPABILITIES commands (deprecated).
+
 AUTH type argument_list {CAP:AUTH} |4|
     authentication as an alternative to IP-based ACL. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR" if authentication failed or command not supported. In any case, access to non-restricted stations is granted. Type can be TOKEN or USERPASS, possibly more in the future.
 
@@ -223,15 +226,17 @@ STATION station_code [network_code] {CAP:MULTISTATION}
 
     If the network code is omitted, default network code is used for backwards compatibility.
 
-    Some servers may support wildcard "\*" in station_code and network_code {CAP:NSWILDCARD}. In this case, the following SELECT, DATA, FETCH and TIME command will be implicitly repeated for all matching stations that are not requested explicitly, including stations that are added to the server in future. Sequence number must not be used unless the server supports {CAP:NSWILDCARDSEQ}.
-
+    Some servers may support wildcards "\*" and "?" in station_code and network_code {CAP:NSWILDCARD}. In this case, the following SELECT, DATA, FETCH and TIME command will be implicitly repeated for all matching stations that are not requested explicitly, including stations that are added to the server in future. Sequence number must not be used unless the server supports {CAP:NSWILDCARDSEQ}.
+    
+    Some servers may support requesting stations that will be added in future {CAP:?}. In this case, STATION responds with "OK" even when a station does not currently exist. Number of wildcard and future stations may be limited to prevent denial-of-service.
+    
 END {CAP:MULTISTATION}
     end of handshaking in multi-station mode. No explicit response is sent.
 
 SELECT [pattern]
     when used without pattern, all selectors are canceled. Otherwise, the pattern is a positive selector to enable matching miniSEED stream transfer. The pattern can be used as well as a negative selector with a leading "!" to prevent the transfer of some miniSEED streams. Only one selector can be used in a single SELECT request. A SeedLink packet is sent to the client if it matches any positive selector and doesn’t match any negative selectors.
 
-    Format of the pattern is LL:CCC.T |4|, where LL is location, CCC is channel, and T is type (one of DECOTL for data, event, calibration, blockette, timing, and log records). "LL", ".T", and "LL:CCC." can be omitted, meaning "any". If the location code is exactly 2 characters and channel code is exactly 3 characters, then ":" should be omitted, because it may not be supported by all servers. Supported wildcard is "?". "-" stands for space (eg., "--" can be used to denote empty location code), but may not be supported by all servers.
+    Format of the pattern is LL:CCC.T |4|, where LL is location, CCC is channel, and T is type (one of DECOTL for data, event, calibration, blockette, timing, and log records). "LL", ".T", and "LL:CCC." can be omitted, meaning "any". If the location code is exactly 2 characters and channel code is exactly 3 characters, then ":" should be omitted, because it may not be supported by all servers. Supported wildcards are "\*" and "?". "-" stands for space (eg., "--" can be used to denote empty location code), but may not be supported by all servers. Number of selectors may be limited to prevent denial-of-service.
 
     SELECT responds with "OK" on success, "ERROR" otherwise.
 
