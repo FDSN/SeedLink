@@ -208,7 +208,7 @@ AUTH type argument_list {CAP:AUTH} |4|
     authentication as an alternative to IP-based ACL. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR" if authentication failed or command not supported. In any case, access to non-restricted stations is granted. Type can be TOKEN or USERPASS, possibly more in the future.
 
 ACCEPT format_list | * |4|
-    enables extended data mode. format_list is a space separated list of formats accepted by the client. Each element of the list is a number from 1 to 255. Some data may be available in multiple alternative formats; in this case, format_list should be interpreted as having decreasing priority and only data in the highest priority format should be sent to client. ``ACCEPT *`` tells the server that all formats are accepted.
+    enables extended data mode. format_list is a space separated list of formats accepted by the client. Each element of the list is a number from 1 to 255. ``ACCEPT *`` tells the server that all formats are accepted.
 
 ENABLE capability |4|
     enables additional capabilities of the server. Only EXTREPLY can be enabled in the current version of the protocol.
@@ -216,19 +216,25 @@ ENABLE capability |4|
 CAPABILITIES capability_list {CAP:CAP}
     specifies capabilities supported by the client. Equivalent of ENABLE when EXTREPLY is included, other capabilities have no effect. This command is included for backwards compatibility.
 
-GETCAPABILITIES
+GETCAPABILITIES {CAP:GETCAP}
     returns space-separated server capabilities as a single line.
 
 STATION station_code [network_code] {CAP:MULTISTATION}
-    enables multi-station mode, which is used to transfer data of multiple stations over a single TCP connection. The STATION command, followed by SELECT (optional) and FETCH, DATA or TIME commands is repeated for each station and the handshaking is finished with END. STATION responds with "OK" on success, "ERROR" otherwise (eg., if the station is not found or multi-station mode is not supported by the server).
-
+    enables multi-station mode, which is used to transfer data of multiple stations over a single TCP connection. The STATION command, followed by SELECT (optional) and FETCH, DATA or TIME commands is repeated for each station and the handshaking is finished with END.
+    
     In multi-station mode, all stations should use either DATA, FETCH or TIME. Mixing different commands results in undefined behaviour.
 
     If the network code is omitted, default network code is used for backwards compatibility.
 
     Some servers may support wildcards "\*" and "?" in station_code and network_code {CAP:NSWILDCARD}. In this case, the following SELECT, DATA, FETCH and TIME command will be implicitly repeated for all matching stations that are not requested explicitly, including stations that are added to the server in future. Sequence number must not be used unless the server supports {CAP:NSWILDCARDSEQ}.
     
-    Some servers may support requesting stations that will be added in future {CAP:?}. In this case, STATION responds with "OK" even when a station does not currently exist. Number of wildcard and future stations may be limited to prevent denial-of-service.
+    Number of stations and wildcards that a client can request may be limited to prevent denial of service.
+    
+    STATION responds with "OK" if the command was accepted, "ERROR" oterwise. "OK" does not imply that the station already exists or is known to the server. "ERROR" may have several reasons, including:
+    
+    * multi-station mode not supported;
+    * station not found;
+    * limits exceeded.
     
 END {CAP:MULTISTATION}
     end of handshaking in multi-station mode. No explicit response is sent.
@@ -258,6 +264,10 @@ INFO level {CAP:INFO}
 
 GET arg {CAP:WEBSOCKET}
     HTTP GET, when used as the very first command, switches to WebSocket encapsulation. Argument is ignored.
+    
+STARTTLS {CAP:STARTTLS}
+    when used as the very first command, switches to TLS. Note: STARTTLS is incompatible with WebSocket; secure WebSocket can be used only with dedicated TLS port.
+
 
 Capabilities
 ------------
@@ -270,11 +280,11 @@ SeedLink 3.x defined 2 sets of capabilities. The original GFZ version defined
 The IRIS DMC version defined "SLPROTO", "CAP", "EXTREPLY", "NSWILDCARD",
 "BATCH" and "WS", which were added to HELLO response.
 
-In SeedLink 4, both INFO CAPABILITIES and HELLO should return the same set of
-unified capabilities, except that INFO CAPABILITIES (if supported) should add
-the legacy (lower-case) capabilities for compatibility reasons.
+In SeedLink 4, HELLO should return a fixed set of capabilities for backwards
+compatibility. Using INFO CAPABILITIES is deprecated. The recommended method of
+determining the capabilities is the GETCAPABILITIES command.
 
-A client may determine supported capabilities by trial and error -- if the
+A client may also determine supported capabilities by trial and error -- if the
 server responds with ERROR, then it can be assumed that the particular
 command/mode is not supported. This method works with all protocol versions.
 
@@ -287,9 +297,15 @@ SLPROTO:#.#
 WEBSOCKET:#
     WebSocket protocol version. This implies that WebSocket shares the same port
     with native SeedLink protocol.
+    
+STARTTLS
+    Upgrading connection to TLS using the STARTTLS command.
 
 CAP
     ENABLE/CAPABILITIES command.
+    
+GETCAP
+    GETCAPABILITIES command.
 
 EXTREPLY
     Extended reply messages. Must be enabled with the ENABLE (CAPABILITIES)
@@ -331,19 +347,3 @@ The following additional features are supported if the server implements
 * DATA, FETCH: 64-bit sequence numbers, nanosconds, optional end time.
 
 * TIME: nanoseconds
-
-Legacy capabilities
-^^^^^^^^^^^^^^^^^^^
-
-dialup
-    Dial-up mode (FETCH command)
-
-multistation
-    Multi-station mode (STATION command)
-
-window-extraction
-    TIME and start_time of DATA/FETCH
-
-info\:level
-    INFO level, where level is "id", "capabilities", "stations", "streams",
-    "gaps", "connections", "all".
