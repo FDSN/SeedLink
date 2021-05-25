@@ -7,7 +7,7 @@ Protocol
 
 Abstract
 --------
-The SeedLink protocol is an application-level protocol for transferring time-series data of seismological and environmental applications in near-real time. A time series is represented as a sequence of variable length packets and is identified by a network, station, location and channel code according to `FDSN Source Identifiers <http://docs.fdsn.org/projects/source-identifiers/en/v1.0/definition.html>`_.
+The SeedLink protocol is an application-level protocol for transferring time-series data of seismological and environmental applications in near-real time. A time series is represented as a sequence of variable length packets and is identified by a network, station, location, and channel code according to `FDSN Source Identifiers <http://docs.fdsn.org/projects/source-identifiers/en/v1.0/definition.html>`_.
 
 SeedLink communication takes place over TCP/IP connections. The default port is TCP 18000 in case of unencrypted connection and 18500 when using TLS. Several time series can be multiplexed in a single connection.
 
@@ -26,7 +26,7 @@ A session has two phases:
 * Handshaking
 * Data transfer
 
-In handshaking phase, the client sends commands to server and receives response to those commands. In data transfer phase, the client receives a stream of SeedLink packets. No data, except the INFO command, is sent from client to server in data transfer phase.
+In handshaking phase, the client sends commands to the server and receives a response to those commands. In data transfer phase, the client receives a stream of SeedLink packets. No data, except the INFO command, is sent from client to server in data transfer phase.
 
 Authentication
 --------------
@@ -34,19 +34,19 @@ Users MAY be authenticated using their IP address or AUTH command. Access to som
 
 Data formats
 ------------
-The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by an 8-bit code in packet header. Code range (TBD) is reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO DATATYPES". The list of data formats supported by the client can be announced with ACCEPT.
+The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by an 8-bit code in packet header. Code range (**TBD**) is reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO DATATYPES". The list of data formats supported by the client can be announced with ACCEPT.
 
-INFO packets, which are sent in response to INFO command, are a special case. The payload of those packets is in JSON format. Since the full JSON document may have large size, which is not known in advance, the JSON document MAY be split into multiple packets. The packets in this case MUST have consecutive sequence numbers starting from 0. The last packet MUST have a bit set in the header, which informs the client that it has received the complete response.
+INFO packets, which are sent in response to INFO command, are a special case. The payload of those packets is in JavaScript Object Notation (JSON) [`RFC7159 <https://datatracker.ietf.org/doc/html/rfc7159>`_] format. Since the full JSON document may have large size, which is not known in advance, the JSON document MAY be split into multiple packets. The packets in this case MUST have consecutive sequence numbers starting from 0. The last packet MUST have a bit set in the header, which informs the client that it has received the complete response.
 
 Start- and end-time of packets
 ------------------------------
-Each packet has a start-time and an end-time. If a packet contains N samples, the start-time is the time of first sample and the end-time is the time of N+1th sample, eg., the expected start-time of the next packet in the same time series.
+Each packet has a start-time and an end-time. If a packet contains N samples, the start-time is the time of the first sample and the end-time is the time of the (N+1)th sample, e.g., the expected time of the first sample of the *next* packet in the same time series.
 
 In case of log packets, start-time MUST be set to the timestamp of the first log message and end-time MUST be set to the timestamp of the last log message.
 
 Sequence numbers
 ----------------
-Each SeedLink packet has a 64-bit sequence number that identifies the position of the packet within the datastream of a station. Sequence numbers of a single station within a single server MUST be unique and monotonically increasing and SHOULD be consecutive--during the data transfer phase, each packet received by a client MUST have greater sequence number than the previous packet of the same station. By capturing the current sequence number of each requested station, a client can resume data transfer in a different session without data loss when using the same server.
+Each SeedLink packet has a 64-bit sequence number that identifies the position of the packet within the data stream of a station. Sequence numbers of a single station within a single server MUST be unique and monotonically increasing and SHOULD be consecutive--during the data transfer phase, each packet received by a client MUST have greater sequence number than the previous packet of the same station. By capturing the current sequence number of each requested station, a client can resume data transfer in a different session without data loss when using the same server.
 
 In general, each SeedLink server assigns new sequence numbers when receiving data, so it is not possible to use the same sequence numbers when connecting to a different server, even when requesting the same stations. However, a set of servers can mirror the data including sequence numbers. In this case a client can resume data transfer using a different server in the same set.
 
@@ -60,7 +60,7 @@ SeedLink commands consist of an ASCII string followed by zero or more arguments 
 
 The server MUST also accept a single <cr> or <lf> as a command terminator. Empty command lines MUST be ignored.
 
-All commands, except HELLO, INFO, GETCAPABILITIES and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code (:ref:`error-codes`) and error description on a single line. The response MUST be terminated by ``<cr><lf>``.
+All commands, except HELLO, INFO, GETCAPABILITIES, and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code (:ref:`error-codes`) and error description on a single line. The response MUST be terminated by ``<cr><lf>``.
 
 In order to speed up handshaking, especially over high-latency links, the client MAY send next command before receiving response to previous one (asynchronous handshaking).
 
@@ -101,10 +101,10 @@ Example handshaking
 Data Transfer
 -------------
 
-When handshaking has been finished with ``END``, the server starts sending data packets. Each packet consists of 16-byte SeedLink header, followed by variable length data. The SeedLink header consists of the letters "SE" followed by data format code (1 byte), flags (1 byte), length of the following data (4 bytes), and sequence number (8 bytes). All numbers are binary, little-endian, unsigned. This is illustrated by the table below.
+When handshaking has been finished with ``END``, the server starts sending data packets. Each packet consists of a 16-byte SeedLink header, followed by variable length data. The SeedLink header consists of the letters "SE" followed by data format code (1 byte), flags (1 byte), length of the following data (4 bytes), and sequence number (8 bytes). All numbers are binary, little-endian, and unsigned. This is illustrated by the table below.
 
 +----------------------------------------+
-| “SE”                                   |
+| "SE"                                   |
 +----------------------------------------+
 | Data format code (1 byte)              |
 +----------------------------------------+
@@ -117,18 +117,18 @@ When handshaking has been finished with ``END``, the server starts sending data 
 | Variable length data                   |
 +----------------------------------------+
 
-Data format codes in the range 0..127 (TBD) have been reserved. This includes the following fixed codes:
+Data format codes in the range 0..127 (**TBD**) have been reserved. This includes the following fixed codes:
 
 50 (ASCII "2")
   MiniSEED 2.x
 
 51 (ASCII "3")
   MiniSEED 3.x
-  
+
 73 (ASCII "I")
   INFO packets (JSON)
-  
-The 8 flag bits have the following meaning:
+
+The eight flag bits have the following meaning:
 
 0
   last INFO fragment
@@ -147,10 +147,12 @@ Commands
 
 All of the following commands are mandatory in version 4, except when marked with {CAP:*}. In the latter case, the command is supported if the server implements indicated capability.
 
-HTTP verbs OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE and CONNECT are reserved.
+Where a command allows or requires additional arguments, there MUST be simple white space between the command and its argument or arguments. Simple whitespace is one or more space (ASCII code 32) or horizontal tab (ASCII code 9) characters.
+
+HTTP verbs OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, and CONNECT are reserved.
 
 HELLO
-    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST be structured as ``SeedLink v4.0 (implementation) :: SLPROTO:4.0 CAP GETCAP``, where "v4.0" is protocol version and "implementation" is software implementation and version, such as "MySeedLink v1.0". The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
+    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST be structured as ``SeedLink v4.0 (implementation) :: SLPROTO:4.0 CAP GETCAP``, where "v4.0" is protocol version and "*implementation*" is software implementation and version, such as "MySeedLink v1.0". The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
 
 SLPROTO 4.0
     Request protocol version. This command MUST be used before any other commands except HELLO.
@@ -160,53 +162,74 @@ USERAGENT program/version (library/version)
 
 BYE
     tells the server to close connection. Using this command is OPTIONAL.
-    
+ 
 AUTH *type* *argument_list* {CAP:AUTH}
-    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Type can be TOKEN or USERPASS, possibly more in the future.
+    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR ACTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Currently *type* can be either "TOKEN" or "USERPASS". Additional values may be allowed in future versions of this protocol.
 
 ACCEPT *format_list*
-    *format_list* is a space separated list of formats accepted by the client. Each element of the list is a number from 1 to 255. By default all formats are accepted.
+    *format_list* is a space separated list of formats accepted by the client. Each element of the list is an integer from 1 to 255. By default all formats are accepted.
 
 GETCAPABILITIES
     returns space-separated server capabilities as a single line terminated by <cr><lf>.
 
 STATION *station_pattern* *network_pattern*
     requests given station(s) from the server.
-    
-    Supported wildcards are "\*" and "?". Following SELECT, DATA and FETCH commands apply to all stations that match the given pattern, including stations that are added to the server in the future.
-    
+ 
+    Supported wildcards are "\*" and "?". Any following SELECT, DATA, or FETCH commands apply to all stations that match the given pattern, including stations that are added to the server in the future.
+ 
     If a station matches multiple STATION commands, then the first one takes effect.
     
     The number of station requests MAY be limited by the server to prevent excessive resource consumption.
-    
+ 
 END
     ends handshaking and switches to data transfer phase.
-    
+ 
 SELECT *location_pattern*.*channel_pattern*[.*type_pattern*]
     requests streams that match given pattern. By default (if SELECT is omitted), all streams are requested. Streams that are not in ACCEPTed format are excluded.
-    
+ 
     Supported wildcards are "\*" and "?". If the argument starts with "!", then streams matching the pattern are excluded.
-    
-    Location can be empty.
-    
-    Type is one of D, E, C, O, T, L for data, event, calibration, opaque, timing, and log records. Default is "\*".
-    
+ 
+    * *location_pattern* can be empty. If so the dot which would separate *location_pattern* from *channel_pattern* MAY/SHOULD/MUST be omitted.
+ 
+    * *type_pattern* is one single character specifying the desired type of record. Currently it may be one of "D", "E", "C", "O", "T", or "L" for data, event, calibration, opaque, timing, or log records. Default is "\*".
+      If it is not provided, the dot separating it from *channel_pattern* MUST be omitted. In this case all types of records will be returned. 
+ 
     SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!".
+
+    Both *location_pattern* and *channel_pattern* may be omitted. In this case the server returns all channels for the station.
     
     The number of SELECT commands per station MAY be limited by the server to prevent excessive resource consumption.
 
+    The following example SELECT statements are valid:
+
+    > SELECT
+    > SELECT BHZ
+    > SELECT BH?
+    > Select BHZ
+	
+    The following are not valid, and a server MUST respond with ERROR:
+
+    > SELECT 0.BHZ
+    > SELECT .BHZ
+    > SELECT BHZ.
+
+(This is valid but should it be?: "SELECT0?BH?")
+
+(This seems like it should be valid but isn't: "SELECT ??.BHZ=
+
+	
 DATA [*seq*]
-    sets the starting sequence number of station(s) that match previous STATION command. If *seq* is -1 or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and -1 MAY be used instead. If a packet with given sequence number is not available, then the sequence number of next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
+    sets the starting sequence number of station(s) that match previous STATION command. If *seq* is -1 or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and -1 MAY be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
 
 DATA *seq* *start_time* [*end_time*] {CAP:TIME}
     requests a time window from station(s) that match previous STATION command. Only packets that satisfy the following conditions are considered:
-    
+
     #. packet.seq >= *seq* (if *seq* != -1)
     #. packet.start_time < *end_time* (if *end_time* given)
     #. packet.end_time > *start_time*
 
-    *start_time* and *end_time* should be in the form of 6 or 7 decimal numbers separated by commas: year,month,day,hour,minute,second,nanosecond. Nanoseconds are optional.
-    
+    *start_time* and *end_time* should be in the form of 6 or 7 decimal numbers separated by commas: year,month,day,hour,minute,second,nanosecond. Nanoseconds are optional. Note that there MUST be *no* space between each number.
+ 
     Using *seq*, it is possible to resume transfer of a time window in a new session.
 
 FETCH [*seq*]
@@ -214,9 +237,9 @@ FETCH [*seq*]
     
 FETCH *seq* *start_time* [*end_time*] {CAP:TIME}
     same as DATA *seq* *start_time* [*end_time*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
-    
+ 
 INFO *level* [*station_code* *network_code*]
-    requests server info in JSON format. *level* should be one of the following: ID, DATATYPES, STATIONS, STREAMS, CONNECTIONS, ALL. *station_code* and *network_code* can contain wildcards "\*" and "?", default is "\*". The JSON schema is shown in appendix (TBD). INFO is allowed during both handshaking and data transfer phases. The response in in form of one or more packets containing (partial) JSON data. The payload of those packets must be concatenated to obtain the complete JSON document. INFO must be supported, but the amount of info available depends on the server implementation and configuration. "INFO ID" is recommended for implementing keep-alive functionality.
+    requests information about the server in JSON format. *level* should be one of the following: ID, DATATYPES, STATIONS, STREAMS, CONNECTIONS, ALL. *station_code* and *network_code* can contain wildcards "\*" and "?", default is "\*". The JSON schema is shown in Appendix B. INFO is allowed during both handshaking and data transfer phases. The response is in the form of one or more packets containing (partial) JSON data. The payload of those packets must be concatenated to obtain the complete JSON document. INFO must be supported, but the amount of information available depends on the server implementation and configuration. "INFO ID" is RECOMMENDED for implementing keep-alive functionality.
 
 .. _error-codes:
 
@@ -224,15 +247,15 @@ Error codes
 -----------
 UNSUPPORTED
     command not supported
-    
+ 
 LIMIT
-    limit exceeded (eg., too many STATION or SELECT commands used)
-    
+    limit exceeded (e.g., too many STATION or SELECT commands were used)
+ 
 ARGUMENTS
     incorrect arguments
-    
+ 
 AUTH
-    authentication failed (invalid, user, password or token)
+    authentication failed (invalid user, password or token were provided)
 
 Capabilities
 ------------
@@ -242,20 +265,20 @@ SLPROTO:#.#
     SeedLink protocol version.
 
 AUTH\:*type*
-    authentiation *type* supported
+    authentication *type* supported.
 
 TIME
-    time windows supported with DATA and FETCH
+    time windows supported with DATA and FETCH.
 
 .. _websocket:
 
-Appendix A: Websocket operation
+Appendix A. WebSocket operation
 -------------------------------
-SeedLink can be used over WebSocket if supported by server.
+SeedLink can be used over WebSocket `RFC 6455 <https://tools.ietf.org/html/rfc6455>` if this is supported by the server.
 
-Each command from client to server MUST be sent as a unicode message consisting of 1 frame. Line terminator <cr><lf> is OPTIONAL.
+Each command from client to server MUST be sent as a Unicode message consisting of 1 frame. Line terminator <cr><lf> is OPTIONAL.
 
-Each command response from server to client MUST be sent as a unicode message consisting of 1 frame. Each line MUST be terminated by <cr><lf>.
+Each command response from server to client MUST be sent as a Unicode message consisting of 1 frame. Each line MUST be terminated by <cr><lf>.
 
 Each packet from server to client (including INFO packets) MUST be sent as a binary message consisting of 1 frame.
 
@@ -263,34 +286,37 @@ The final ``END`` (when "dial-up mode" is used) MUST be sent as a binary message
 
 Depending on the maximum frame size of a particular WebSocket implementation, the maximum size of SeedLink packet encapsulated in WebSocket frame may be smaller than 2^32+7 bytes, which is the theoretical maximum packet size supported by SeedLink.
 
-Appendix B: JSON schema
+Appendix B. JSON schema
 -----------------------
 
-Appendix C: Differences between SeedLink 3 and SeedLink 4
+**TBD**
+
+
+Appendix C. Differences between SeedLink 3 and SeedLink 4
 ---------------------------------------------------------
 SeedLink 4 protocol is not compatible with SeedLink 3 clients. However, SeedLink 4 is enabled by using the "SLPROTO 4.0" command, which is not known to SeedLink 3 clients, so a SeedLink 4 server can also support SeedLink 3 protocol.
 
 .. |w| unicode:: 0x26A0
 
-The following new features were added in SeedLink 4. Incompatible changes (SeedLink 3 format/syntax interpreted differently in SeedLink 4) are marked with |w|.
+The following new features were added in SeedLink 4. Incompatible changes, where SeedLink 3 format or syntax is interpreted differently in SeedLink 4, are marked with |w|.
 
-* New packet header, multiple payload formats and variable length supported. |w|
-* No explicit maximum length of network, station, location and channel codes.
-* Wildcards "\*" and "?" allowed in network, station, location and channel codes.
-* Sequence numbers are 64-bit. |w|
+* New packet header, multiple payload formats and variable length are supported. |w|
+* There is no explicit maximum length of network, station, location, and channel codes.
+* Wildcards "\*" and "?" allowed in network, station, location, and channel codes.
+* Sequence numbers are now 64-bit. |w|
 * SELECT requires explicit location and channel codes, separated by a dot. |w|
 * Optional end-time and sequence number (-1) with DATA and FETCH.
 * SLPROTO, USERAGENT, AUTH, ACCEPT and GETCAPABILITIES commands added.
 * INFO DATATYPES.
 * INFO format is JSON instead of XML. |w|
-* Extended ERROR response
-* Asynchronous handshaking
+* Extended ERROR response.
+* Asynchronous handshaking.
 
-The following commands were removed in SeedLink 4
+The following commands present in some older versions of the SeedLink protocol were removed in SeedLink 4:
 
 * CAT (same functionality provided by "INFO STATIONS").
 * TIME (same functionality provided by extended DATA syntax).
 * BATCH (same functionality provided by asynchronous handshaking).
 * INFO GAPS (incompatible with unsorted data packets, performance issues).
-* INFO CAPABILITIES (same functionality provided by GETCAPABILITIES)
-* CAPABILITIES (similar functionality provided by SLPROTO)
+* INFO CAPABILITIES (same functionality provided by GETCAPABILITIES).
+* CAPABILITIES (similar functionality provided by SLPROTO).
