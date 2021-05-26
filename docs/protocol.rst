@@ -42,7 +42,7 @@ Start- and end-time of packets
 ------------------------------
 Each packet has a start-time and an end-time. If a packet contains N samples, the start-time is the time of first sample and the end-time is the time of N+1th sample, eg., the expected start-time of the next packet in the same time series.
 
-In case of log packets, start-time MUST be set to the timestamp of the first log message and end-time MUST be set to the timestamp of the last log message.
+Start-time of a log packet is defined as the timestamp of the first log message and ent-time of a log packet is defined as the timestamp of the last log message.
 
 Sequence numbers
 ----------------
