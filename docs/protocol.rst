@@ -36,7 +36,7 @@ Data formats
 ------------
 The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by an 8-bit code in packet header. Code range (TBD) is reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO DATATYPES". The list of data formats supported by the client can be announced with ACCEPT.
 
-INFO packets, which are sent in response to INFO command, are a special case. The payload of those packets is in JSON format. Since the full JSON document may have large size, which is not known in advance, the JSON document MAY be split into multiple packets. The packets in this case MUST have consecutive sequence numbers starting from 0. The last packet MUST have a bit set in the header, which informs the client that it has received the complete response.
+The payload of INFO packet, which is sent in response to INFO command, is in JSON format and is not influenced by ACCEPT.
 
 Start- and end-time of packets
 ------------------------------
@@ -48,9 +48,7 @@ Sequence numbers
 ----------------
 Each SeedLink packet has a 64-bit sequence number that identifies the position of the packet within the datastream of a station. Sequence numbers of a single station within a single server MUST be unique and monotonically increasing and SHOULD be consecutive--during the data transfer phase, each packet received by a client MUST have greater sequence number than the previous packet of the same station. By capturing the current sequence number of each requested station, a client can resume data transfer in a different session without data loss when using the same server.
 
-In general, each SeedLink server assigns new sequence numbers when receiving data, so it is not possible to use the same sequence numbers when connecting to a different server, even when requesting the same stations. However, a set of servers can mirror the data including sequence numbers. In this case a client can resume data transfer using a different server in the same set.
-
-Packets SHOULD be sorted by end time before assigning sequence numbers. If this is not possible, unsorted packets may be sent to clients.
+The current specification has no opinion about whether sequence numbers retain meaning across separate servers.
 
 Handshaking
 -----------
@@ -101,14 +99,14 @@ Example handshaking
 Data Transfer
 -------------
 
-When handshaking has been finished with ``END``, the server starts sending data packets. Each packet consists of 16-byte SeedLink header, followed by variable length data. The SeedLink header consists of the letters "SE" followed by data format code (1 byte), flags (1 byte), length of the following data (4 bytes), and sequence number (8 bytes). All numbers are binary, little-endian, unsigned. This is illustrated by the table below.
+When handshaking has been finished with ``END``, the server starts sending data packets. Each packet consists of 16-byte SeedLink header, followed by variable length data. The SeedLink header consists of the letters "SE" followed by data format code (1 byte), reserved (1 byte), length of the following data (4 bytes), and sequence number (8 bytes). All numbers are binary, little-endian, unsigned. This is illustrated by the table below.
 
 +----------------------------------------+
 | “SE”                                   |
 +----------------------------------------+
 | Data format code (1 byte)              |
 +----------------------------------------+
-| Flags (1 byte)                         |
+| Reserved (1 byte)                      |
 +----------------------------------------+
 | Length of the following data (4 bytes) |
 +----------------------------------------+
@@ -128,14 +126,6 @@ Data format codes in the range 0..127 (TBD) have been reserved. This includes th
 73 (ASCII "I")
   INFO packets (JSON)
   
-The 8 flag bits have the following meaning:
-
-0
-  last INFO fragment
-
-1..7
-  reserved
-
 In "dial-up mode" (FETCH command), only queued data is transferred. When transferring packets of all requested stations has completed, the server MUST append ASCII string ``END`` (without <cr><lf>) to the last packet and wait for the client to close connection.
 
 In "real-time mode" (DATA command), the data transfer phase never ends unless the client aborts the connection or a network error occurs.
@@ -179,6 +169,8 @@ STATION *station_pattern* *network_pattern*
     
     The number of station requests MAY be limited by the server to prevent excessive resource consumption.
     
+    STATION may return ERROR for any implementation-defined reason. In this case, SELECT, DATA and FETCH commands up to next STATION must be ignored.
+    
 END
     ends handshaking and switches to data transfer phase.
     
@@ -215,8 +207,10 @@ FETCH [*seq*]
 FETCH *seq* *start_time* [*end_time*] {CAP:TIME}
     same as DATA *seq* *start_time* [*end_time*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
     
-INFO *level* [*station_code* *network_code*]
-    requests server info in JSON format. *level* should be one of the following: ID, DATATYPES, STATIONS, STREAMS, CONNECTIONS, ALL. *station_code* and *network_code* can contain wildcards "\*" and "?", default is "\*". The JSON schema is shown in appendix (TBD). INFO is allowed during both handshaking and data transfer phases. The response in in form of one or more packets containing (partial) JSON data. The payload of those packets must be concatenated to obtain the complete JSON document. INFO must be supported, but the amount of info available depends on the server implementation and configuration. "INFO ID" is recommended for implementing keep-alive functionality.
+INFO *item* [*station_code* *network_code*]
+    requests server info in JSON format. *item* should be one of the following: ID, DATATYPES, STATIONS, STREAMS, CONNECTIONS. *station_code* and *network_code* can contain wildcards "\*" and "?", default is "\*". The JSON schema is shown in appendix (TBD). INFO is allowed during both handshaking and data transfer phases. The response MUST be in form of single packet containing complete JSON document. If the expected size of the document would exceed implementation-defined limit, a JSON document with error description MUST be sent instead (eg., no ERROR response or incomplete JSON is allowed).
+    
+    The amount of info available depends on the server implementation and configuration. "INFO ID" is recommended for implementing keep-alive functionality.
 
 .. _error-codes:
 
