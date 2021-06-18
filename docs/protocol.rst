@@ -80,17 +80,17 @@ Example handshaking
     < SLPROTO:4.0 TIME<cr><lf>
     > SLPROTO 4.0<cr><lf>
     < OK<cr><lf>
-    > ACCEPT 51 50<cr><lf>
+    > ACCEPT 2 3<cr><lf>
     < OK<cr><lf>
     > STATION APE GE<cr><lf>
     < OK<cr><lf>
-    > SELECT 00.BH?.D<cr><lf>
+    > SELECT *.BH?.D.2<cr><lf>
     < OK<cr><lf>
     > DATA 0000000016FF890D<cr><lf>
     < OK<cr><lf>
     > STATION WLF GE<cr><lf>
     < OK<cr><lf>
-    > SELECT 00.HH?.D<cr><lf>
+    > SELECT *.HH?.D.3<cr><lf>
     < OK<cr><lf>
     > DATA 000000001551B73D<cr><lf>
     < OK<cr><lf>
@@ -115,16 +115,28 @@ When handshaking has been finished with ``END``, the server starts sending data 
 | Variable length data                   |
 +----------------------------------------+
 
-Data format codes in the range 0..127 (TBD) have been reserved. This includes the following fixed codes:
+Data format code must be an ASCII character in the range '0'..'9' or 'A'..'Z':
 
-50 (ASCII "2")
+'0'..'1'
+  Reserved.
+
+'2'
   MiniSEED 2.x
 
-51 (ASCII "3")
+'3'
   MiniSEED 3.x
   
-73 (ASCII "I")
-  INFO packets (JSON)
+'4'..'9'
+  Reserved for standard formats.
+
+'A'..'H'
+  User-defined.
+  
+'I'
+  INFO packets (JSON).
+  
+'J'..'Z'
+  User-defined.
   
 In "dial-up mode" (FETCH command), only queued data is transferred. When transferring packets of all requested stations has completed, the server MUST append ASCII string ``END`` (without <cr><lf>) to the last packet and wait for the client to close connection.
 
@@ -155,7 +167,7 @@ AUTH *type* *argument_list* {CAP:AUTH}
     authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Type can be TOKEN or USERPASS, possibly more in the future.
 
 ACCEPT *format_list*
-    *format_list* is a space separated list of formats accepted by the client. Each element of the list is a number from 1 to 255. By default all formats are accepted.
+    *format_list* is a space separated list of formats accepted by the client. Each element of the list is a number from 0 to 9 or a letter from A to Z. By default all formats are accepted.
 
 GETCAPABILITIES
     returns space-separated server capabilities as a single line terminated by <cr><lf>.
@@ -174,7 +186,7 @@ STATION *station_pattern* *network_pattern*
 END
     ends handshaking and switches to data transfer phase.
     
-SELECT *location_pattern*.*channel_pattern*[.*type_pattern*]
+SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
     requests streams that match given pattern. By default (if SELECT is omitted), all streams are requested. Streams that are not in ACCEPTed format are excluded.
     
     Supported wildcards are "\*" and "?". If the argument starts with "!", then streams matching the pattern are excluded.
@@ -182,6 +194,8 @@ SELECT *location_pattern*.*channel_pattern*[.*type_pattern*]
     Location can be empty.
     
     Type is one of D, E, C, O, T, L for data, event, calibration, opaque, timing, and log records. Default is "\*".
+    
+    Format is a number from 0 to 9 or a letter from A to Z. Default is "\*".
     
     SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!".
     
