@@ -74,12 +74,12 @@ Example handshaking
     > HELLO<cr><lf>
     < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0 CAP GETCAP<cr><lf>
     < GEOFON<cr><lf>
+    > SLPROTO 4.0<cr><lf>
+    < OK<cr><lf>
     > USERAGENT slinktool/4.3 (libslink/2020.046)<cr><lf>
     < OK<cr><lf>
     > GETCAPABILITIES<cr><lf>
     < SLPROTO:4.0 TIME<cr><lf>
-    > SLPROTO 4.0<cr><lf>
-    < OK<cr><lf>
     > ACCEPT 2 3<cr><lf>
     < OK<cr><lf>
     > STATION APE GE<cr><lf>
@@ -126,16 +126,8 @@ The data format code must be a single ASCII character in the range '0'..'9' or '
 '3'
   MiniSEED 3.x
 
-73 (ASCII "I")
-  INFO packets (JSON)
-
-The eight flag bits have the following meaning:
-
-0
-  last INFO fragment
-
-1..7
-  reserved
+'4'..'9'
+  Reserved for standard formats.
 
 'A'..'H'
   User-defined.
@@ -201,35 +193,27 @@ SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
 
     Supported wildcards are "\*" and "?". If the argument starts with "!", then streams matching the pattern are excluded.
 
-    * *location_pattern* can be empty. If so the dot which would separate *location_pattern* from *channel_pattern* MAY/SHOULD/MUST be omitted.
+    * *location_pattern* and *channel_pattern* are mandatory.
+
+    * *location_pattern* can be empty.
 
     * *type_pattern* is one single character specifying the desired type of record. Currently it may be one of "D", "E", "C", "O", "T", or "L" for data, event, calibration, opaque, timing, or log records. Default is "\*".
-      If it is not provided, the dot separating it from *channel_pattern* MUST be omitted. In this case all types of records will be returned.
 
     SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!".
-
-    Both *location_pattern* and *channel_pattern* may be omitted. In this case the server returns all channels for the station.
 
     The number of SELECT commands per station MAY be limited by the server to prevent excessive resource consumption.
 
     The following example SELECT statements are valid:
 
-    > SELECT
-    > SELECT BHZ
-    > SELECT BH?
-    > Select BHZ
-	
+    > SELECT .BHZ
+    > SELECT .BH?
+    > Select .BHZ
+    > SELECT 0.BHZ
+
     The following are not valid, and a server MUST respond with ERROR:
 
-    > SELECT 0.BHZ
-    > SELECT .BHZ
-    > SELECT BHZ.
+    > SELECT BHZ
 
-(This is valid but should it be?: "SELECT0?BH?")
-
-(This seems like it should be valid but isn't: "SELECT ??.BHZ=
-
-	
 DATA [*seq*]
     sets the starting sequence number of station(s) that match previous STATION command. If *seq* is -1 or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and -1 MAY be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
 
