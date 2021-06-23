@@ -139,13 +139,13 @@ The eight flag bits have the following meaning:
 
 'A'..'H'
   User-defined.
-  
+
 'I'
   INFO packets (JSON).
-  
+
 'J'..'Z'
   User-defined.
-  
+
 In "dial-up mode" (FETCH command), only queued data is transferred. When transferring packets of all requested stations has completed, the server MUST append ASCII string ``END`` (without <cr><lf>) to the last packet and wait for the client to close connection.
 
 In "real-time mode" (DATA command), the data transfer phase never ends unless the client aborts the connection or a network error occurs.
@@ -172,7 +172,7 @@ USERAGENT program/version (library/version)
 
 BYE
     tells the server to close connection. Using this command is OPTIONAL.
- 
+
 AUTH *type* *argument_list* {CAP:AUTH}
     authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR ACTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Currently *type* can be either "TOKEN" or "USERPASS". Additional values may be allowed in future versions of this protocol.
 
@@ -184,32 +184,32 @@ GETCAPABILITIES
 
 STATION *station_pattern* *network_pattern*
     requests given station(s) from the server.
- 
+
     Supported wildcards are "\*" and "?". Any following SELECT, DATA, or FETCH commands apply to all stations that match the given pattern, including stations that are added to the server in the future.
- 
+
     If a station matches multiple STATION commands, then the first one takes effect.
-    
+
     The number of station requests MAY be limited by the server to prevent excessive resource consumption.
-    
+
     STATION may return ERROR for any implementation-defined reason. In this case, SELECT, DATA and FETCH commands up to next STATION must be ignored.
-    
+
 END
     ends handshaking and switches to data transfer phase.
-    
+
 SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
     requests streams that match given pattern. By default (if SELECT is omitted), all streams are requested. Streams that are not in ACCEPTed format are excluded.
- 
+
     Supported wildcards are "\*" and "?". If the argument starts with "!", then streams matching the pattern are excluded.
- 
+
     * *location_pattern* can be empty. If so the dot which would separate *location_pattern* from *channel_pattern* MAY/SHOULD/MUST be omitted.
- 
+
     * *type_pattern* is one single character specifying the desired type of record. Currently it may be one of "D", "E", "C", "O", "T", or "L" for data, event, calibration, opaque, timing, or log records. Default is "\*".
-      If it is not provided, the dot separating it from *channel_pattern* MUST be omitted. In this case all types of records will be returned. 
- 
+      If it is not provided, the dot separating it from *channel_pattern* MUST be omitted. In this case all types of records will be returned.
+
     SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!".
 
     Both *location_pattern* and *channel_pattern* may be omitted. In this case the server returns all channels for the station.
-    
+
     The number of SELECT commands per station MAY be limited by the server to prevent excessive resource consumption.
 
     The following example SELECT statements are valid:
@@ -241,18 +241,18 @@ DATA *seq* *start_time* [*end_time*] {CAP:TIME}
     #. packet.end_time > *start_time*
 
     *start_time* and *end_time* should be in the form of 6 or 7 decimal numbers separated by commas: year,month,day,hour,minute,second,nanosecond. Nanoseconds are optional. Note that there MUST be *no* space between each number.
- 
+
     Using *seq*, it is possible to resume transfer of a time window in a new session.
 
 FETCH [*seq*]
     same as DATA [*seq*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
-    
+
 FETCH *seq* *start_time* [*end_time*] {CAP:TIME}
     same as DATA *seq* *start_time* [*end_time*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
-    
+
 INFO *item* [*station_code* *network_code*]
     requests information about the server in JSON format. *item* should be one of the following: ID, DATATYPES, STATIONS, STREAMS, CONNECTIONS. *station_code* and *network_code* can contain wildcards "\*" and "?", default is "\*". The JSON schema is shown in Appendix B. INFO is allowed during both handshaking and data transfer phases. The response MUST be in the form of one single packet containing complete JSON document. If the expected size of the document would exceed an implementation-defined limit, a JSON document with error description MUST be sent instead (that is, no ERROR response or incomplete JSON may be sent by the server).
-    
+
     The amount of info available depends on the server implementation and configuration. "INFO ID" is recommended for implementing keep-alive functionality.
 
 .. _error-codes:
@@ -261,13 +261,13 @@ Error codes
 -----------
 UNSUPPORTED
     command not supported
- 
+
 LIMIT
     limit exceeded (e.g., too many STATION or SELECT commands were used)
- 
+
 ARGUMENTS
     incorrect arguments
- 
+
 AUTH
     authentication failed (invalid user, password or token were provided)
 
