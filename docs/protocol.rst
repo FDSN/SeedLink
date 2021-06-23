@@ -38,11 +38,11 @@ The payload of a SeedLink packet is usually a miniSEED record, but other formats
 
 The payload of an INFO packet, which is sent in response to INFO command, is in JavaScript Object Notation (JSON) [`RFC7159 <https://datatracker.ietf.org/doc/html/rfc7159>`_] format. The payload is not influenced by ACCEPT.
 
-Start- and end-time of packets
+Start and end time of packets
 ------------------------------
-Each packet has a start-time and an end-time. If a packet contains N samples, the start-time is the time of the first sample and the end-time is the time of the (N+1)th sample, e.g., the expected time of the first sample of the *next* packet in the same time series.
+Each packet has a start time and an end time for its data. If a packet contains N samples, the start time is the time of the first sample and the end time is the time of the (N+1)th sample, e.g., the expected time of the first sample of the *next* packet in the same time series.
 
-Start-time of a log packet is defined as the timestamp of the first log message and ent-time of a log packet is defined as the timestamp of the last log message.
+Start time of a log packet is defined as the timestamp of the first log message and end time of a log packet is defined as the timestamp of the last log message.
 
 Sequence numbers
 ----------------
