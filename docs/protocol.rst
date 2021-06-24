@@ -34,7 +34,7 @@ Users MAY be authenticated using their IP address or AUTH command. Access to som
 
 Data formats
 ------------
-The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by an 8-bit code in packet header. Code range (**TBD**) is reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO DATATYPES". The list of data formats supported by the client can be announced with ACCEPT.
+The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by an 8-bit code in packet header. Code range (**TBD**) is reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO FORMATS". The list of data formats supported by the client can be announced with ACCEPT.
 
 The payload of an INFO packet, which is sent in response to INFO command, is in JavaScript Object Notation (JSON) [`RFC7159 <https://datatracker.ietf.org/doc/html/rfc7159>`_] format. The payload is not influenced by ACCEPT.
 
@@ -58,7 +58,7 @@ SeedLink commands consist of an ASCII string followed by zero or more arguments 
 
 The server MUST also accept a single <cr> or <lf> as a command terminator. Empty command lines MUST be ignored.
 
-All commands, except HELLO, INFO, GETCAPABILITIES, and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code (:ref:`error-codes`) and error description on a single line. The response MUST be terminated by ``<cr><lf>``.
+All commands, except HELLO, INFO, GETCAPABILITIES, and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code (:ref:`error-codes`) and optionally error description on a single line. The response MUST be terminated by ``<cr><lf>``.
 
 In order to speed up handshaking, especially over high-latency links, the client MAY send next command before receiving response to previous one (asynchronous handshaking).
 
@@ -154,7 +154,7 @@ Where a command allows or requires additional arguments, there MUST be simple wh
 HTTP verbs OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, and CONNECT are reserved.
 
 HELLO
-    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST be structured as ``SeedLink v4.0 (implementation) :: SLPROTO:4.0 CAP GETCAP``, where "v4.0" is protocol version and "*implementation*" is software implementation and version, such as "MySeedLink v1.0". The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
+    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink v4.0 (implementation) :: SLPROTO:4.0``, where "v4.0" is protocol version and "*implementation*" is software implementation and version, such as "MySeedLink v1.0". If the server supports earlier SeedLink protocol versions, legacy capabilities may be added to this line. The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
 
 SLPROTO 4.0
     Request protocol version. This command MUST be used before any other commands except HELLO.
@@ -166,13 +166,13 @@ BYE
     tells the server to close connection. Using this command is OPTIONAL.
 
 AUTH *type* *argument_list* {CAP:AUTH}
-    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR ACTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Currently *type* can be either "TOKEN" or "USERPASS". Additional values may be allowed in future versions of this protocol.
+    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Currently *type* can be either "TOKEN" or "USERPASS". Additional values may be allowed in future versions of this protocol.
 
 ACCEPT *format_list*
     *format_list* is a space separated list of formats accepted by the client. Each element of the list is a number from 0 to 9 or a letter from A to Z. By default all formats are accepted.
 
 GETCAPABILITIES
-    returns space-separated server capabilities as a single line terminated by <cr><lf>.
+    returns space-separated server capabilities (:ref:`capabilities`) as a single line terminated by <cr><lf>.
 
 STATION *station_pattern* *network_pattern*
     requests given station(s) from the server.
@@ -195,7 +195,7 @@ SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
 
     * *location_pattern* and *channel_pattern* are mandatory.
 
-    * *location_pattern* can be empty.
+    * *location_pattern* can be empty, matching empty location code in the data.
 
     * *type_pattern* is one single character specifying the desired type of record. Currently it may be one of "D", "E", "C", "O", "T", or "L" for data, event, calibration, opaque, timing, or log records. Default is "\*".
 
@@ -203,16 +203,16 @@ SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
 
     The number of SELECT commands per station MAY be limited by the server to prevent excessive resource consumption.
 
-    The following example SELECT statements are valid:
+    The following example SELECT statements are valid::
 
-    > SELECT .BHZ
-    > SELECT .BH?
-    > Select .BHZ
-    > SELECT 0.BHZ
+        > SELECT .BHZ
+        > SELECT .BH?
+        > Select .BHZ
+        > SELECT 0.BHZ
 
-    The following are not valid, and a server MUST respond with ERROR:
+    The following are not valid, and a server MUST respond with "ERROR ARGUMENTS"::
 
-    > SELECT BHZ
+        > SELECT BHZ
 
 DATA [*seq*]
     sets the starting sequence number of station(s) that match previous STATION command. If *seq* is -1 or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and -1 MAY be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
@@ -244,7 +244,10 @@ INFO *item* [*station_code* *network_code*]
 Error codes
 -----------
 UNSUPPORTED
-    command not supported
+    command not recognized or not supported
+
+UNEXPECTED
+    command not expected
 
 LIMIT
     limit exceeded (e.g., too many STATION or SELECT commands were used)
@@ -254,6 +257,8 @@ ARGUMENTS
 
 AUTH
     authentication failed (invalid user, password or token were provided)
+
+.. _capabilities:
 
 Capabilities
 ------------
