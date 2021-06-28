@@ -99,21 +99,18 @@ Example handshaking
 Data Transfer
 -------------
 
-When handshaking has been finished with ``END``, the server starts sending data packets. Each packet consists of a 16-byte SeedLink header, followed by variable length data. The SeedLink header consists of the letters "SE" followed by data format code (1 byte), reserved (1 byte), length of the following data (4 bytes), and sequence number (8 bytes). All numbers are binary, little-endian, and unsigned. This is illustrated by the table below.
+When handshaking has been finished with ``END``, the server starts sending data packets, which have the following structure:
 
-+----------------------------------------+
-| "SE"                                   |
-+----------------------------------------+
-| Data format code (1 byte)              |
-+----------------------------------------+
-| Reserved (1 byte)                      |
-+----------------------------------------+
-| Length of the following data (4 bytes) |
-+----------------------------------------+
-| Sequence number (8 bytes)              |
-+----------------------------------------+
-| Variable length data                   |
-+----------------------------------------+
+===== ================= ====== ======== ====== ==============================================
+Field Field name        Type   Length   Offset Content
+===== ================= ====== ======== ====== ==============================================
+1     Signature         CHAR   2        0      ASCII, "SE"
+2     Data format       CHAR   1        2      ASCII
+3     Reserved          N/A    1        3      N/A
+4     Length of payload UINT32 4        4      unsigned 4-byte integer, binary, little endian
+5     Sequence number   UINT64 8        8      unsigned 8-byte integer, binary, little endian
+6     Payload           binary variable 16     binary data
+===== ================= ====== ======== ====== ==============================================
 
 The data format code must be a single ASCII character in the range '0'..'9' or 'A'..'Z':
 
@@ -248,6 +245,9 @@ UNSUPPORTED
 
 UNEXPECTED
     command not expected
+
+UNAUTHORIZED
+    client is not authorized to use the command
 
 LIMIT
     limit exceeded (e.g., too many STATION or SELECT commands were used)
