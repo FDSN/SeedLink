@@ -46,7 +46,7 @@ Start time of a log packet is defined as the timestamp of the first log message 
 
 Sequence numbers
 ----------------
-Each SeedLink packet has a 64-bit sequence number that identifies the position of the packet within the data stream of a station. Sequence numbers of a single station within a single server MUST be unique and monotonically increasing and SHOULD be consecutive--during the data transfer phase, each packet received by a client MUST have greater sequence number than the previous packet of the same station. By capturing the current sequence number of each requested station, a client can resume data transfer in a different session without data loss when using the same server.
+Each SeedLink packet has a 64-bit sequence number that identifies the position of the packet within the data stream of a station. Sequence numbers of a single station within a single server MUST be unique and strictly increasing and SHOULD be consecutive--during the data transfer phase, each packet received by a client MUST have greater sequence number than the previous packet of the same station. By capturing the current sequence number of each requested station, a client can resume data transfer in a different session without data loss when using the same server.
 
 From a client's perspective, a gap in sequence numbers does not imply missing packets.
 
