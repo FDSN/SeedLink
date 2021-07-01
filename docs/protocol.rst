@@ -114,28 +114,24 @@ Field Field name        Type   Length   Offset Content
 6     Payload           binary variable 16     binary data
 ===== ================= ====== ======== ====== ==============================================
 
-The data format code must be a single ASCII character in the range '0'..'9' or 'A'..'Z':
+The data format code must be a single ASCII character in the range '0'..'9' or 'A'..'Z'. The following codes are reserved:
 
-'0'..'1'
-  Reserved.
-
-'2'
+2
   MiniSEED 2.x
 
-'3'
+3
   MiniSEED 3.x
 
-'4'..'9'
-  Reserved for standard formats.
+4, 5, 6, 7, 8, 9
+  Reserved for FDSN.
 
-'A'..'H'
-  User-defined.
+E, C, T, O, L
+  MiniSEED 2.x (reserved for GEOFON).
 
-'I'
+I
   INFO packets (JSON).
 
-'J'..'Z'
-  User-defined.
+Remaining codes can be assigned dynamically. A client SHOULD look up MIME type with INFO (e.g., "INFO FORMATS") before using format codes. "INFO STREAMS" shows the available formats.
 
 In "dial-up mode" (FETCH command), only queued data is transferred. When transferring packets of all requested stations has completed, the server MUST append ASCII string ``END`` (without <cr><lf>) to the last packet and wait for the client to close connection.
 
@@ -187,7 +183,7 @@ STATION *station_pattern* *network_pattern*
 END
     ends handshaking and switches to data transfer phase.
 
-SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
+SELECT *location_pattern*.*channel_pattern*[.*format_pattern*]
     requests streams that match given pattern. By default (if SELECT is omitted), all streams are requested. Streams that are not in ACCEPTed format are excluded.
 
     Supported wildcards are "\*" and "?". If the argument starts with "!", then streams matching the pattern are excluded.
@@ -196,8 +192,8 @@ SELECT *location_pattern*.*channel_pattern*[.*type_pattern*[.*format_pattern*]]
 
     * *location_pattern* can be empty, matching empty location code in the data.
 
-    * *type_pattern* is one single character specifying the desired type of record. Currently it may be one of "D", "E", "C", "O", "T", or "L" for data, event, calibration, opaque, timing, or log records. Default is "\*".
-
+    * *format_pattern* is one single character specifying the format code. Default is all available formats.
+    
     SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!".
 
     The number of SELECT commands per station MAY be limited by the server to prevent excessive resource consumption.
