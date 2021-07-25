@@ -1,0 +1,44 @@
+{
+    "software": "SeedLink v4.0 (2021.195#69304df) :: SLPROTO:4.0",
+    "organization": "GEOFON",
+    "format": {
+        "2": {
+            "mimetype": "application/vnd.fdsn.mseed",
+            "subformat": {
+                "D": "data",
+                "E": "event",
+                "C": "calibration",
+                "T": "timing",
+                "O": "opaque",
+                "L": "log"
+            }
+        },
+        "3": {
+            "mimetype": "application/vnd.fdsn.mseed3"
+        },
+        "J": {
+            "mimetype": "application/json",
+            "subformat": {
+                "I": "seedlink-info",
+                "E": "seedlink-error"
+            }
+        }
+    },
+    "station": [
+        {
+            "id": "GE_APE",
+            "description": "GEOFON Station Apirathos, Naxos",
+            "begin_seq": 3497286,
+            "end_seq": 3507286,
+            "stream": [
+                {
+                    "id": "_B_H_Z",
+                    "format": "2",
+                    "subformat": "D",
+                    "begin_time": "2021-07-25T17:48:11.775Z",
+                    "end_time": "2021-07-25T19:14:06.275Z"
+                }
+            ]
+        }
+    ]
+}

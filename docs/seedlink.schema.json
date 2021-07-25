@@ -1,0 +1,127 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "SeedLink v4 INFO schema",
+    "type": "object",
+    "required": [
+        "software",
+        "organization"
+    ],
+    "properties": {
+        "software": {
+            "description": "Software ID as in HELLO response",
+            "type": "string"
+        },
+        "organization": {
+            "description": "Station or data center description as in HELLO response",
+            "type": "string"
+        },
+        "error": {
+            "type": "object",
+            "required": [
+                "code",
+                "message"
+            ],
+            "properties": {
+                "code": {
+                    "description": "Error code",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "Error message",
+                    "type": "string"
+                }
+            }
+        },
+        "format": {
+            "description": "Dictionary of formats supported by the server",
+            "type": "object",
+            "patternProperties": {
+                "^[A-Z0-9]$": {
+                    "type": "object",
+                    "properties": {
+                        "mimetype": {
+                            "description": "MIME type of format",
+                            "type": "string"
+                        },
+                        "subformat": {
+                            "type": "object",
+                            "patternProperties": {
+                                "^[A-Z0-9]$": {
+                                    "description": "Description of subformat",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "station": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "description",
+                    "begin_seq",
+                    "end_seq"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Station ID",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Station description",
+                        "type": "string"
+                    },
+                    "begin_seq": {
+                        "description": "First sequence number available",
+                        "type": "integer"
+                    },
+                    "end_seq": {
+                        "description": "Next sequence number (last sequence number available + 1)",
+                        "type": "integer"
+                    },
+                    "stream": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "format",
+                                "subformat",
+                                "begin_time",
+                                "end_time"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "description": "Stream ID",
+                                    "type": "string"
+                                },
+                                "format": {
+                                    "description": "Stream format",
+                                    "type": "string",
+                                    "pattern": "^[A-Z0-9]$"
+                                },
+                                "subformat": {
+                                    "description": "Stream subformat",
+                                    "type": "string",
+                                    "pattern": "^[A-Z0-9]$"
+                                },
+                                "begin_time": {
+                                    "description": "Start time of the first packet in the ringbuffer",
+                                    "type": "string"
+                                },
+                                "end_time": {
+                                    "description": "End time of the last packet in the ringbuffer",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

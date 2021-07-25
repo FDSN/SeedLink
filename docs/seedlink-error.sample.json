@@ -1,0 +1,8 @@
+{
+    "software": "SeedLink v4.0 (2021.195#69304df) :: SLPROTO:4.0",
+    "organization": "GEOFON",
+    "error": {
+        "message": "requested info level is not supported",
+        "code": "ARGUMENTS"
+    }
+}
