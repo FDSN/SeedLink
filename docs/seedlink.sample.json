@@ -14,7 +14,10 @@
             }
         },
         "3": {
-            "mimetype": "application/vnd.fdsn.mseed3"
+            "mimetype": "application/vnd.fdsn.mseed3",
+            "subformat": {
+                "D": "data"
+            }
         },
         "J": {
             "mimetype": "application/json",

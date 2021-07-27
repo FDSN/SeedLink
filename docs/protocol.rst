@@ -368,6 +368,10 @@ Appendix B. JSON schema
                 "patternProperties": {
                     "^[A-Z0-9]$": {
                         "type": "object",
+                        "required": [
+                            "mimetype",
+                            "subformat"
+                        ],
                         "properties": {
                             "mimetype": {
                                 "description": "MIME type of format",
@@ -375,6 +379,7 @@ Appendix B. JSON schema
                             },
                             "subformat": {
                                 "type": "object",
+                                "minProperties": 1,
                                 "patternProperties": {
                                     "^[A-Z0-9]$": {
                                         "description": "Description of subformat",
