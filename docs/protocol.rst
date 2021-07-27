@@ -74,39 +74,52 @@ In order to speed up handshaking, especially over high-latency links, the client
 
 Flowchart and an example are shown below.
 
-# .. figure::  Handshaking_flowchart.svg
+Handshaking flowchart
+^^^^^^^^^^^^^^^^^^^^^
+
+.. figure::  Handshaking_flowchart.svg
 
 Example handshaking
 ^^^^^^^^^^^^^^^^^^^
 
+``>`` denotes data sent from client to server, ``<`` denotes data sent from server to client. Each line ends with <cr><lf>, which is not shown for better readability.
+
 ::
 
-    > HELLO<cr><lf>
-    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0 CAP GETCAP<cr><lf>
-    < GEOFON<cr><lf>
-    > SLPROTO 4.0<cr><lf>
-    < OK<cr><lf>
-    > USERAGENT slinktool/4.3 (libslink/2020.046)<cr><lf>
-    < OK<cr><lf>
-    > GETCAPABILITIES<cr><lf>
-    < SLPROTO:4.0 TIME<cr><lf>
-    > ACCEPT 2 3<cr><lf>
-    < OK<cr><lf>
-    > STATION GE_APE<cr><lf>
-    < OK<cr><lf>
+    > HELLO
+    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0 CAP GETCAP
+    < GEOFON
+    > SLPROTO 4.0
+    < OK
+    > USERAGENT slinktool/4.3 (libslink/2020.046)
+    < OK
+    > GETCAPABILITIES
+    < SLPROTO:4.0 TIME
+    > ACCEPT 2 3
+    < OK
+    > STATION GE_APE
+    < OK
     > SELECT
-    < ERROR ARGUMENTS empty SELECT is not allowed in v4<cr><lf>
-    > SELECT *_B_H_?.2D<cr><lf>
-    < OK<cr><lf>
-    > DATA 0000000016FF890D<cr><lf>
-    < OK<cr><lf>
-    > STATION GE_WLF<cr><lf>
-    < OK<cr><lf>
-    > SELECT *_H_H_?.3<cr><lf>
-    < OK<cr><lf>
-    > DATA 000000001551B73D<cr><lf>
-    < OK<cr><lf>
-    > END<cr><lf>
+    < ERROR ARGUMENTS empty SELECT is not allowed in v4
+    > SELECT *_B_H_?.2D
+    < OK
+    > DATA 16FF890D
+    < OK
+    > STATION GE_WLF
+    < OK
+    > SELECT *_H_H_?.3
+    < OK
+    > DATA 1551B73D
+    < OK
+    > STATION GE_*
+    < OK
+    > SELECT *_H_H_?
+    < OK
+    > DATA 356D46
+    < ERROR ARGUMENTS using sequence number with station wildcard is not supported
+    > DATA
+    < OK
+    > END
 
 Data Transfer
 -------------
@@ -173,6 +186,8 @@ Where a command allows or requires additional arguments, there MUST be simple wh
 HTTP verbs OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, and CONNECT are reserved.
 
 All commands are case-insensitive. Maximum length of the command line is 256(?) characters, including the <cr><lf> terminator.
+
+Square brackets denote optional parts. Ellipsis denotes a list of one or more items.
 
 ACCEPT *format*[*subformat*]...
     tells the server which formats are accepted by the client. Argument is a space-separated list of format and optionally subformat codes. The command can be used multiple times, in which case the lists are merged. By default all formats are accepted.
@@ -267,8 +282,12 @@ STATION *station_pattern*
         > STATION *F
         > SELECT *_S_*
     
-USERAGENT program/version (library/version)
-    optionally identifies client software used. Argument SHOULD follow the given format, for example ``USERAGENT slinktool/4.3 (libslink/2020.046)``. The command has no effect on functionality, but helps with logging and statistics on the server side.
+USERAGENT program_or_library/version...
+    optionally identifies client software used. Argument is expected to be a space-separated list of ``program_or_library/version``. No spaces are allowed within individual items. For example when someone embeds slarchive into a larger framework, the USERAGENT can identify the wrapper system, slarchive and the library as::
+    
+        > USERAGENT wrapper/version slarchive/4.0 library/3.0.0
+    
+    The command has no effect on functionality, but helps with logging and statistics on the server side.
 
 .. _error-codes:
 
