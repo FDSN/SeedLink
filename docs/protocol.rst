@@ -34,9 +34,9 @@ Users MAY be authenticated using their IP address or AUTH command. Access to som
 
 Data formats
 ------------
-The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by a format code and subformat code in packet header. Some codes are reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO FORMATS". The list of data formats supported by the client can be announced with ACCEPT.
+The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by a format code and subformat code in packet header. Some codes are reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO FORMATS".
 
-The payload of an INFO packet, which is sent in response to INFO command, is in JavaScript Object Notation (JSON) [`RFC7159 <https://datatracker.ietf.org/doc/html/rfc7159>`_] format. The payload is not influenced by ACCEPT.
+The payload of an INFO packet, which is sent in response to INFO command, is in JavaScript Object Notation (JSON) [`RFC7159 <https://datatracker.ietf.org/doc/html/rfc7159>`_] format.
 
 Station ID and stream ID
 ------------------------
