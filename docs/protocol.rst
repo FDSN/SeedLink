@@ -87,7 +87,7 @@ Example handshaking
 ::
 
     > HELLO
-    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0
+    < SeedLink v4.0 (MySeedLink/1.0) :: SLPROTO:4.0
     < GEOFON
     > SLPROTO 4.0
     < OK
@@ -232,11 +232,11 @@ GETCAPABILITIES
     returns space-separated server capabilities (:ref:`capabilities`) as a single line terminated by <cr><lf>.
 
 HELLO
-    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink vX.Y (implementation) :: ``, where X.Y is the highest supported protocol version and *implementation* is software implementation and version, such as "MySeedLink v1.0". For each supported major protocol version, ``SLPROTO:A.B`` MUST be added (space separated), where A is the major version and B is the highest minor version. Lower minor versions are expected to be implicitly supported. Legacy capabilities may be added.
+    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink vX.Y (implementation) ::``, where X.Y is the highest supported protocol version and *implementation* is software implementation and version, such as "MySeedLink/1.0". For each supported major protocol version, ``SLPROTO:A.B`` MUST be added (space separated), where A is the major version and B is the highest minor version. Lower minor versions are expected to be implicitly supported. Legacy capabilities may be added.
     
     For example, here is a valid first line of HELLO response of a server that supoprt protocols 3.0, 3.1 and 4.0::
     
-        > SeedLink v4.0 (2022.075 RingServer) :: SLPROTO:3.1 SLPROTO:4.0 CAP EXTREPLY NSWILDCARD BATCH WS:13
+        > SeedLink v4.0 (RingServer/2022.075) :: SLPROTO:3.1 SLPROTO:4.0 CAP EXTREPLY NSWILDCARD BATCH WS:13
     
     The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
     
