@@ -191,8 +191,16 @@ All commands are case-insensitive. Maximum length of the command line is 256(?) 
 
 Square brackets denote optional parts. Ellipsis denotes a list of one or more items.
 
-AUTH *type* *argument_list* {CAP:AUTH}
-    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Currently *type* can be either "TOKEN" or "USERPASS". Additional values may be allowed in future versions of this protocol.
+AUTH *type* *argument*... {CAP:AUTH}
+    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed, "ERROR UNSUPPORTED" if command or *type* is not supported or "ERROR UNEXPECTED" if AUTH is supported, but connection is unencrypted. Authentication over unencrypted connection MUST NOT be allowed.
+    
+    Regardless if authentication is successful or not, access to non-restricted stations MUST be granted.
+    
+    If *type* is USERPASS, then arguments are *username* and *password*. Either must not contain spaces::
+    
+        > AUTH USERPASS johndoe letmein
+        
+    Type TOKEN is reserved, but not specified. Additional types may be added in future revisions of this specification.
 
 BYE
     tells the server to close connection. Using this command is OPTIONAL.
