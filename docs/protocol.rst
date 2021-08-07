@@ -40,7 +40,7 @@ The payload of an INFO packet, which is sent in response to INFO command, is in 
 
 Station ID and stream ID
 ------------------------
-Each packet has a station ID and stream ID. These are not explicitly included in SeedLink header, but derived from payload programmatically. In case of miniSEED 2.x and miniSEED 3.x (with FDSN source identifier), station ID is expected to be in form of NET_STA, where NET is network code and STA is station code, and stream ID is expected be in form of LOC_B_S_SS, where LOC is location code, B is band code, S is source code and SS is subsource code.
+Each packet has a station ID and stream ID. Station ID is included in the SeedLink header while stream ID is derived from payload programmatically. In case of miniSEED 2.x and miniSEED 3.x (with FDSN source identifier), station ID is expected to be in form of NET_STA, where NET is network code and STA is station code, and stream ID is expected be in form of LOC_B_S_SS, where LOC is location code, B is band code, S is source code and SS is subsource code.
 
 Pattern matching
 ----------------
@@ -87,11 +87,11 @@ Example handshaking
 ::
 
     > HELLO
-    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0 CAP GETCAP
+    < SeedLink v4.0 (MySeedLink v1.0) :: SLPROTO:4.0
     < GEOFON
     > SLPROTO 4.0
     < OK
-    > USERAGENT slinktool/4.3 (libslink/2020.046)
+    > USERAGENT slinktool/4.3 libslink/2020.046
     < OK
     > GETCAPABILITIES
     < SLPROTO:4.0 TIME
@@ -103,19 +103,19 @@ Example handshaking
     < ERROR ARGUMENTS empty SELECT is not allowed in v4
     > SELECT *_B_H_?.2D
     < OK
-    > DATA 16FF890D
+    > DATA 1405339897
     < OK
     > STATION GE_WLF
     < OK
-    > SELECT *_H_H_?.3
+    > SELECT *_H_H_?:native
     < OK
-    > DATA 1551B73D
+    > DATA 254483417
     < OK
     > STATION GE_*
     < OK
     > SELECT *_H_H_?
     < OK
-    > DATA 356D46
+    > DATA 3929540
     < ERROR ARGUMENTS using sequence number with station wildcard is not supported
     > DATA
     < OK
@@ -126,16 +126,18 @@ Data Transfer
 
 When handshaking has been finished with ``END``, the server starts sending data packets, which have the following structure:
 
-===== ================= ====== ======== ====== ==============================================
-Field Field name        Type   Length   Offset Content
-===== ================= ====== ======== ====== ==============================================
-1     Signature         CHAR   2        0      ASCII, "SE"
-2     Data format       CHAR   1        2      ASCII
-3     Subformat         CHAR   1        3      ASCII
-4     Length of payload UINT32 4        4      unsigned 4-byte integer, binary, little endian
-5     Sequence number   UINT64 8        8      unsigned 8-byte integer, binary, little endian
-6     Payload           binary variable 16     binary data
-===== ================= ====== ======== ====== ==============================================
+===== ==================== ====== ======== ====== ==============================================
+Field Field name           Type   Length   Offset Content
+===== ==================== ====== ======== ====== ==============================================
+1     Signature            CHAR   2        0      ASCII, "SE"
+2     Data format          CHAR   1        2      ASCII
+3     Subformat            CHAR   1        3      ASCII
+4     Length of payload    UINT32 4        4      unsigned 4-byte integer, binary, little endian
+5     Sequence number      UINT64 8        8      unsigned 8-byte integer, binary, little endian
+6     Length of station ID UINT8  1        9      unsigned 1-byte integer, binary
+7     Station ID           CHAR   variable 10     ASCII
+8     Payload              binary variable 18     binary data
+===== ==================== ====== ======== ====== ==============================================
 
 Data format and subformat codes MUST be single ASCII characters in the range of '0'..'9' or 'A'..'Z'. The following codes are reserved:
 
@@ -189,17 +191,6 @@ All commands are case-insensitive. Maximum length of the command line is 256(?) 
 
 Square brackets denote optional parts. Ellipsis denotes a list of one or more items.
 
-ACCEPT *format*[*subformat*]...
-    tells the server which formats are accepted by the client. Argument is a space-separated list of format and optionally subformat codes. The command can be used multiple times, in which case the lists are merged. By default all formats are accepted.
-    
-    Example: accept miniSEED 3.x (any record types) and miniSEED 2.x data records::
-
-        > ACCEPT 3 2D
-    
-    Example: accept user-defined format with code A::
-    
-        > ACCEPT A
-    
 AUTH *type* *argument_list* {CAP:AUTH}
     authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command not supported. In any case, access to non-restricted stations is granted. Currently *type* can be either "TOKEN" or "USERPASS". Additional values may be allowed in future versions of this protocol.
 
@@ -207,7 +198,7 @@ BYE
     tells the server to close connection. Using this command is OPTIONAL.
 
 DATA [*seq*]
-    sets the starting sequence number of station(s) that match previous STATION command. If *seq* is -1 or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and -1 MAY be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
+    sets the starting sequence number of station(s) that match previous STATION command. *seq* is a decimal integer in ASCII coding. If *seq* is -1 or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and -1 MAY be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
 
 DATA *seq* *start_time* [*end_time*] {CAP:TIME}
     requests a time window from station(s) that match previous STATION command. Only packets that satisfy the following conditions are considered:
@@ -233,7 +224,13 @@ GETCAPABILITIES
     returns space-separated server capabilities (:ref:`capabilities`) as a single line terminated by <cr><lf>.
 
 HELLO
-    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink v4.0 (implementation) :: SLPROTO:4.0``, where "v4.0" is protocol version and "*implementation*" is software implementation and version, such as "MySeedLink v1.0". If the server supports earlier SeedLink protocol versions, legacy capabilities may be added to this line. The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
+    responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink vX.Y (implementation) :: ``, where X.Y is the highest supported protocol version and *implementation* is software implementation and version, such as "MySeedLink v1.0". For each supported major protocol version, ``SLPROTO:A.B`` MUST be added (space separated), where A is the major version and B is the highest minor version. Lower minor versions are expected to be implicitly supported. Legacy capabilities may be added.
+    
+    For example, here is a valid first line of HELLO response of a server that supoprt protocols 3.0, 3.1 and 4.0::
+    
+        > SeedLink v4.0 (2022.075 RingServer) :: SLPROTO:3.1 SLPROTO:4.0 CAP EXTREPLY NSWILDCARD BATCH WS:13
+    
+    The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
     
 INFO *item* [*station_pattern* [*stream_pattern*[.*format_subformat_pattern*]]]
     requests information about the server in JSON format. *item* can be one of the following: ID, FORMATS, STATIONS, STREAMS, CONNECTIONS. *station_pattern* matches the station ID, *stream_pattern* matches the stream ID, *format_subformat_pattern* matches the combined format and subformat code (2 caracters). Supported wildcards are "\*" and "?".
@@ -244,12 +241,22 @@ INFO *item* [*station_pattern* [*stream_pattern*[.*format_subformat_pattern*]]]
     
     "INFO ID" is recommended for implementing keep-alive functionality.
 
-SELECT [!]*stream_pattern*[.*format_subformat_pattern*]...
-    selects given streams of a station. Argument is a space-separated list of patterns. By default (if SELECT is omitted), all streams are requested. Streams that are not in ACCEPTed format are excluded.
+SELECT [!]*stream_pattern*[.*format_subformat_pattern*][:*filter*]...
+    selects given streams of a station. By default (if SELECT is omitted), all streams are requested.
 
     *stream_pattern* matches the stream ID, *format_subformat_pattern* matches the concatenated format and subformat code (2 caracters). Supported wildcards are "\*" and "?". In case of leading "!", the matching streams are excluded.
+    
+    *filter* can be used to convert data to different format and discard duplicate streams. Supported filters are listed with "INFO", for example:
+    
+    native
+        provide data in native format (e.g., miniSEED 2.x) if available.
+        
+    3
+        provide data in miniSEED 3.x if possible, converting the data on-the-fly if needed.
+        
+    The :*filter* suffix MUST NOT be used together with "!" prefix.
 
-    SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!".
+    SELECT can be used multiple times per station. A stream is selected if it matches any SELECT without "!" and does **not** match any SELECT with "!". If a stream matches multiple patterns with :*filter* suffix, the first match takes effect.
 
     The number of SELECT commands per station MAY be limited by the server to prevent excessive resource consumption.
     
@@ -258,9 +265,15 @@ SELECT [!]*stream_pattern*[.*format_subformat_pattern*]...
     Example: select any streams with empty location code and band code B, but exclude subformat E::
     
         > SELECT _B* !*.*E
+        
+    Example: get any stream in miniSEED 3.x if possible, but opaque records in native format::
+    
+        > SELECT *.*O:native *:3
+        
+    An opaque stream, for example, "OCF.2O" matches both patterns, but according to the above rule, the first filter, "native", would take effect.
 
-SLPROTO 4.0
-    Request protocol version. This command MUST be used once before any other commands except HELLO.
+SLPROTO *version*
+    Request protocol version. *version* is one of the supported SLPROTO versions reported by HELLO or a lower minor version thereof. For example, if HELLO reports SLPROTO:4.1 capability, both "SLPROTO 4.0" and "SLPROTO 4.1" would be valid. This command MUST be used once before any other commands except HELLO when using protocol version 4.0 or higher.
 
 STATION *station_pattern*
     requests stations that match given pattern.
@@ -275,13 +288,19 @@ STATION *station_pattern*
     
     Available station IDs can be requested with "INFO STATIONS". In case of miniSEED 2.x and miniSEED 3.x (with FDSN source identifier), the format of station ID is NET_STA, where NET is network code and STA is station code.
     
-    Example: request GE_WLF and select streams with band code B; request stations whose station code ends with "F" (except GE_WLF) and select streams with either band code S or source code S::
+    Example:
+        * request GE_WLF and select streams with band code B;
+        * request stations whose station code ends with "F" (except GE_WLF) and select streams with either band code B or source code B;
+        * request stations whose network code starts with "G" (except GE_WLF and stations whose station code ends with "F") and select streams whose band code, source code or subsource code starts with B:
+    ::
     
         > STATION GE_WLF
-        > SELECT *_B_?_?
+        > SELECT *_B_*_*
         > STATION *F
-        > SELECT *_S_*
-    
+        > SELECT *_B_*
+        > STATION G*
+        > SELECT *_B*
+        
 USERAGENT program_or_library/version...
     optionally identifies client software used. Argument is expected to be a space-separated list of ``program_or_library/version``. No spaces are allowed within individual items. For example when someone embeds slarchive into a larger framework, the USERAGENT can identify the wrapper system, slarchive and the library as::
     
@@ -410,6 +429,16 @@ Appendix B. JSON schema
                     }
                 }
             },
+            "filter": {
+                "description": "Dictionary of filters supported by the server",
+                "type": "object",
+                "patternProperties": {
+                    "^[A-Z0-9]$": {
+                        "description": "Description of filter",
+                        "type": "string"
+                    }
+                }
+            },
             "station": {
                 "type": "array",
                 "items": {
@@ -418,7 +447,8 @@ Appendix B. JSON schema
                         "id",
                         "description",
                         "begin_seq",
-                        "end_seq"
+                        "end_seq",
+                        "backfill"
                     ],
                     "properties": {
                         "id": {
@@ -437,6 +467,10 @@ Appendix B. JSON schema
                             "description": "Next sequence number (last sequence number available + 1)",
                             "type": "integer"
                         },
+                        "backfill": {
+                            "description": "How many seconds to wait for gaps to fill: -1 = undefined, 0 = data is strictly in time order",
+                            "type": "integer"
+                        },
                         "stream": {
                             "type": "array",
                             "items": {
@@ -445,6 +479,7 @@ Appendix B. JSON schema
                                     "id",
                                     "format",
                                     "subformat",
+                                    "origin",
                                     "begin_time",
                                     "end_time"
                                 ],
@@ -462,6 +497,11 @@ Appendix B. JSON schema
                                         "description": "Stream subformat",
                                         "type": "string",
                                         "pattern": "^[A-Z0-9]$"
+                                    },
+                                    "origin": {
+                                        "description": "Origin of stream",
+                                        "type": "string",
+                                        "enum": ["undefined", "native", "converted"],
                                     },
                                     "begin_time": {
                                         "description": "Start time of the first packet in the ringbuffer",
@@ -485,30 +525,32 @@ Appendix C. Differences between SeedLink 3 and SeedLink 4
 ---------------------------------------------------------
 SeedLink 4 protocol is not compatible with SeedLink 3 clients. However, SeedLink 4 is enabled by using the "SLPROTO 4.0" command, which is not known to SeedLink 3 clients, so a SeedLink 4 server can also support SeedLink 3 protocol.
 
-.. |w| unicode:: 0x26A0
+The following features were added or changed in SeedLink 4.
 
-The following new features were added in SeedLink 4. Incompatible changes, where SeedLink 3 format or syntax is interpreted differently in SeedLink 4, are marked with |w|.
-
-* New packet header, multiple payload formats and variable length are supported. |w|
-* Network and station code combined to station ID (no length restriction). |w|
-* Location and channel code combined to stream ID (no length restriction). |w|
+* New packet header, multiple payload formats and variable length packets are supported.
+* Network and station code combined to station ID (no length restriction).
+* Location and channel code combined to stream ID (no length restriction).
 * Optional station ID and stream ID arguments of INFO, wildcards supported.
-* STATION takes a single station ID argument and supports wildcards. |w|
-* Different SELECT syntax, wildcard "\*" supported. |w|
-* 64-bit sequence numbers. |w|
-* New date format of DATA and FETCH. |w|
+* STATION takes a single station ID argument and supports wildcards.
+* Different SELECT syntax, wildcard "\*" supported.
+* 64-bit sequence numbers.
+* ISO8601-compatible date format of DATA and FETCH.
 * Optional end-time and sequence number (-1) with DATA and FETCH.
-* SLPROTO, USERAGENT, AUTH, ACCEPT and GETCAPABILITIES commands added.
-* INFO DATATYPES.
-* INFO format is JSON instead of XML. |w|
+* AUTH, GETCAPABILITIES, SLPROTO and USERAGENT commands added.
+* INFO FORMATS.
+* INFO format is JSON instead of XML.
 * Extended ERROR response.
-* Asynchronous handshaking.
+* Support for asynchronous handshaking.
 
 The following commands present in some older versions of the SeedLink protocol were removed in SeedLink 4:
 
-* CAT (same functionality provided by "INFO STATIONS").
-* TIME (same functionality provided by extended DATA syntax).
-* BATCH (same functionality provided by asynchronous handshaking).
-* INFO GAPS (incompatible with unsorted data packets, performance issues).
-* INFO CAPABILITIES (same functionality provided by GETCAPABILITIES).
-* CAPABILITIES (similar functionality provided by SLPROTO).
+================= ===========================================================
+Command           Reason of removal
+================= ===========================================================
+BATCH             similar functionality provided by asynchronous handshaking
+CAPABILITIES      similar functionality provided by SLPROTO
+CAT               same functionality provided by "INFO STATIONS"
+INFO CAPABILITIES same functionality provided by GETCAPABILITIES
+INFO GAPS         incompatible with unsorted data packets, performance issues
+TIME              same functionality provided by extended DATA syntax
+================= ===========================================================
