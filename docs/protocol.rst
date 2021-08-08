@@ -68,7 +68,7 @@ SeedLink commands consist of an ASCII string followed by zero or more arguments 
 
 The server MUST also accept a single <cr> or <lf> as a command terminator. Empty command lines MUST be ignored.
 
-All commands, except HELLO, INFO, GETCAPABILITIES, and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code (:ref:`error-codes`) and optionally error description on a single line, space separated. The response MUST be terminated by ``<cr><lf>``.
+All commands, except HELLO, INFO, GETCAPABILITIES, and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code and optionally error description on a single line, space separated. Error code is a single word with no spaces (:ref:`error-codes`). Error description is free UTF-8 text containing no <cr> or <lf>. The response MUST be terminated by ``<cr><lf>``.
 
 In order to speed up handshaking, especially over high-latency links, the client MAY send next command before receiving response to previous one (asynchronous handshaking).
 
@@ -170,7 +170,7 @@ Data format and subformat codes MUST be single ASCII characters in the range of 
 | X     | XML                       |                              |
 +-------+---------------------------+------------------------------+
 
-Remaining codes can be assigned dynamically. A client SHOULD look up MIME type with INFO (e.g., "INFO FORMATS") before using format codes. "INFO STREAMS" shows the available formats.
+Remaining codes can be assigned dynamically. A client SHOULD look up MIME type with INFO (e.g., "INFO FORMATS") before using format codes.
 
 In "dial-up mode" (FETCH command), only queued data is transferred. When transferring packets of all requested stations has completed, the server MUST append ASCII string ``END`` (without <cr><lf>) to the last packet and wait for the client to close connection. It is not allowed to send more data from server to client after END has been sent. Any commands except BYE MUST be ignored by the server. If the client does not close connection during reasonable time period after receiving END, then the connection MAY be closed by the server. 
 
@@ -371,6 +371,21 @@ Depending on the maximum frame size of a particular WebSocket implementation, th
 
 Appendix B. JSON schema
 -----------------------
+
+Optional properties depend on INFO item requested and are shown in the following table.
+
+=========== ===============================
+Item        Optional properties included
+=========== ===============================
+ID
+FORMATS     format, filter
+STATIONS    format, filter, station
+STREAMS     format, filter, station, stream
+=========== ===============================
+
+The response of "INFO CONNECTIONS" is implementation defined and is not included in the schema.
+
+In case of error, only the "error" property is returned in addition to required properties.
 
 ::
 
