@@ -187,7 +187,7 @@ Where a command allows or requires additional arguments, there MUST be simple wh
 
 HTTP verbs OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, and CONNECT are reserved.
 
-All commands are case-insensitive. Maximum length of the command line is 256(?) characters, including the <cr><lf> terminator.
+All commands are case-insensitive. Maximum length of the command line is 255 characters, including the <cr><lf> terminator.
 
 Square brackets denote optional parts. Ellipsis denotes a list of one or more items.
 
@@ -281,7 +281,7 @@ SELECT [!]*stream_pattern*[.*format_subformat_pattern*][:*filter*]...
     An opaque stream, for example, "OCF.2O" matches both patterns, but according to the above rule, the first filter, "native", would take effect.
 
 SLPROTO *version*
-    Request protocol version. *version* is one of the supported SLPROTO versions reported by HELLO or a lower minor version thereof. For example, if HELLO reports SLPROTO:4.1 capability, both "SLPROTO 4.0" and "SLPROTO 4.1" would be valid. This command MUST be used once before any other commands except HELLO when using protocol version 4.0 or higher.
+    Request protocol version. *version* MUST be one of the supported SLPROTO versions reported by HELLO or a lower minor version thereof. For example, if HELLO reports SLPROTO:4.1 capability, both "SLPROTO 4.0" and "SLPROTO 4.1" would be valid. In protocol version 4.0 and higher, SLPROTO MUST be used once before any other commands except HELLO.
 
 STATION *station_pattern*
     requests stations that match given pattern.
