@@ -126,18 +126,18 @@ Data Transfer
 
 When handshaking has been finished with ``END``, the server starts sending data packets, which have the following structure:
 
-===== ==================== ====== ======== ====== ==============================================
-Field Field name           Type   Length   Offset Content
-===== ==================== ====== ======== ====== ==============================================
-1     Signature            CHAR   2        0      ASCII, "SE"
-2     Data format          CHAR   1        2      ASCII
-3     Subformat            CHAR   1        3      ASCII
-4     Length of payload    UINT32 4        4      unsigned 4-byte integer, binary, little endian
-5     Sequence number      UINT64 8        8      unsigned 8-byte integer, binary, little endian
-6     Length of station ID UINT8  1        9      unsigned 1-byte integer, binary
-7     Station ID           CHAR   variable 10     ASCII
-8     Payload              binary variable 18     binary data
-===== ==================== ====== ======== ====== ==============================================
+===== ==================== ====== ======== ============ ==============================================
+Field Field name           Type   Length   Offset       Content
+===== ==================== ====== ======== ============ ==============================================
+1     Signature            CHAR   2        0            ASCII, "SE"
+2     Data format          CHAR   1        2            ASCII
+3     Subformat            CHAR   1        3            ASCII
+4     Length of payload    UINT32 4        4            unsigned 4-byte integer, binary, little endian
+5     Sequence number      UINT64 8        8            unsigned 8-byte integer, binary, little endian
+6     Length of station ID UINT8  1        16           unsigned 1-byte integer, binary
+7     Station ID           CHAR   variable 17           ASCII
+8     Payload              binary variable 17 + field 6 binary data
+===== ==================== ====== ======== ============ ==============================================
 
 Data format and subformat codes MUST be single ASCII characters in the range of '0'..'9' or 'A'..'Z'. The following codes are reserved:
 
@@ -469,9 +469,8 @@ In case of error, only the "error" property is returned in addition to required 
                     "required": [
                         "id",
                         "description",
-                        "begin_seq",
+                        "start_seq",
                         "end_seq",
-                        "backfill"
                     ],
                     "properties": {
                         "id": {
@@ -482,7 +481,7 @@ In case of error, only the "error" property is returned in addition to required 
                             "description": "Station description",
                             "type": "string"
                         },
-                        "begin_seq": {
+                        "start_seq": {
                             "description": "First sequence number available",
                             "type": "integer"
                         },
@@ -502,8 +501,7 @@ In case of error, only the "error" property is returned in addition to required 
                                     "id",
                                     "format",
                                     "subformat",
-                                    "origin",
-                                    "begin_time",
+                                    "start_time",
                                     "end_time"
                                 ],
                                 "properties": {
@@ -524,9 +522,9 @@ In case of error, only the "error" property is returned in addition to required 
                                     "origin": {
                                         "description": "Origin of stream",
                                         "type": "string",
-                                        "enum": ["undefined", "native", "converted"],
+                                        "enum": ["native", "converted"],
                                     },
-                                    "begin_time": {
+                                    "start_time": {
                                         "description": "Start time of the first packet in the ringbuffer",
                                         "type": "string"
                                     },
@@ -559,6 +557,7 @@ The following features were added or changed in SeedLink 4.
 * 64-bit sequence numbers.
 * ISO8601-compatible date format of DATA and FETCH.
 * Optional end-time and sequence number (-1) with DATA and FETCH.
+* Sequence number as an argument to DATA and FETCH is written in decimal notation instead of hexadecimal.
 * AUTH, GETCAPABILITIES, SLPROTO and USERAGENT commands added.
 * INFO FORMATS.
 * INFO format is JSON instead of XML.
