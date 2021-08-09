@@ -44,7 +44,7 @@ Each packet has a station ID and stream ID. Station ID is included in the SeedLi
 
 Pattern matching
 ----------------
-STATION, SELECT and INFO commands match against station ID, stream ID and combined data format and subformat code. Supported metacharacters are "\*" (matching any number of characters) and "?" (matching a single character). In case of station and stream ID, the pattern is achored to the beginning and end of string. For example "\_\*Z" matches "_B_H_Z", but not "00_B_H_Z" or "_B_Z_H".
+STATION, SELECT and INFO commands match against station ID, stream ID and combined data format and subformat code. Supported metacharacters are "\*" (matching any number of characters) and "?" (matching a single character). In case of station and stream ID, the pattern is anchored to the beginning and end of string. For example "\_\*Z" matches "_B_H_Z", but not "00_B_H_Z" or "_B_Z_H".
 
 In case of combined format and subformat code, the pattern is anchored to the beginning of string only. For example "2" matches "2D", but does not match "D2".
 
@@ -68,7 +68,7 @@ SeedLink commands consist of an ASCII string followed by zero or more arguments 
 
 The server MUST also accept a single <cr> or <lf> as a command terminator. Empty command lines MUST be ignored.
 
-All commands, except HELLO, INFO, GETCAPABILITIES, and END, respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code and optionally error description on a single line, space separated. Error code is a single word with no spaces (:ref:`error-codes`). Error description is free UTF-8 text containing no <cr> or <lf>. The response MUST be terminated by ``<cr><lf>``.
+All commands, except HELLO, INFO, GETCAPABILITIES, and END, MUST respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code and optionally error description on a single line, space separated. Error code is a single word with no spaces (:ref:`error-codes`). Error description is free UTF-8 text containing no <cr> or <lf>. The response MUST be terminated by ``<cr><lf>``.
 
 In order to speed up handshaking, especially over high-latency links, the client MAY send next command before receiving response to previous one (asynchronous handshaking).
 
@@ -95,8 +95,8 @@ Example handshaking
     < OK
     > GETCAPABILITIES
     < SLPROTO:4.0 TIME
-    > ACCEPT 2 3
-    < OK
+    > AUTH johndoe letmein
+    < ERROR AUTH authentication failed
     > STATION GE_APE
     < OK
     > SELECT
@@ -234,7 +234,7 @@ GETCAPABILITIES
 HELLO
     responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink vX.Y (implementation) ::``, where X.Y is the highest supported protocol version and *implementation* is software implementation and version, such as "MySeedLink/1.0". For each supported major protocol version, ``SLPROTO:A.B`` MUST be added (space separated), where A is the major version and B is the highest minor version. Lower minor versions are expected to be implicitly supported. Legacy capabilities may be added.
     
-    For example, here is a valid first line of HELLO response of a server that supoprt protocols 3.0, 3.1 and 4.0::
+    For example, here is a valid first line of HELLO response of a server that supports protocols 3.0, 3.1 and 4.0::
     
         > SeedLink v4.0 (RingServer/2022.075) :: SLPROTO:3.1 SLPROTO:4.0 CAP EXTREPLY NSWILDCARD BATCH WS:13
     
