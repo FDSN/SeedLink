@@ -1,3 +1,8 @@
+
+# PROPOSAL IN REVIEW
+
+> :warning: **This repository contains a proposal specification in review and is _not_ an FDSN standard**
+
 # SeedLink protocol specification
 
 This specification defines the SeedLink protocol for near real-time data stream transmition used primarily for seismological networks.
