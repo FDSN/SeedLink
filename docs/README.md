@@ -4,6 +4,7 @@ This specification defines the SeedLink protocol for near real-time data stream 
 
 This repository contains the source of the documentation and serves as a coordination point for additions and changes to the specification.
 
+[Contingent on acceptance]
 The documentation may be found at: http://docs.fdsn.org/projects/seedlink/
 
 ## Documentation source organization

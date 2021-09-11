@@ -19,7 +19,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'SeedLink'
-copyright = '2020, International FDSN'
+copyright = '2021, International FDSN'
 author = 'FDSN'
 
 # The full version, including alpha/beta/rc tags
