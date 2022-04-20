@@ -11,7 +11,7 @@ the SeedLink protocol.
 SeisComP
 --------
 
-https://www.seiscomp3.org/
+https://www.seiscomp.de/
 
 slinktool
 ---------
