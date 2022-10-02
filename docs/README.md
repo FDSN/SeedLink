@@ -15,5 +15,5 @@ The documentation may be found at: http://docs.fdsn.org/projects/seedlink/
 ## Documentation source organization
 
 * The `draft` branch contains the latest draft documentation
-* Specification releases are branches from master, following a release:
-** the version (in conf.py) is updated appropriately on the branch, never in master
+* Specification releases are branches from `main`, following a release:
+** the version (in conf.py) is updated appropriately on the branch, never in `main`
