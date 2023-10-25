@@ -30,7 +30,7 @@ In handshaking phase, the client sends commands to the server and receives a res
 
 Authentication
 --------------
-Users MAY be authenticated using their IP address or AUTH command. Access to some stations MAY be restricted to selected users. If a user does not have access to a station, then all commands SHOULD behave as if the station does not exist.
+Users MAY be authenticated using AUTH command. Access to some stations MAY be restricted to selected users. If a user does not have access to a station, then all commands SHOULD behave as if the station does not exist.
 
 Data formats
 ------------
