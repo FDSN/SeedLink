@@ -8,7 +8,7 @@ Versions
 4.0
 ---
 
-*2020*
+*2024*
 
 The goal of SeedLink v4 is to unify and standardize the extensions
 added since v3.1, and to define new protocol extensions to allow for
