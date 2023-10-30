@@ -537,6 +537,11 @@ In case of error, only the "error" property is returned in addition to required 
                         }
                     }
                 }
+            },
+            "connections": {
+                "description": "Connections to the server. Contents are implementation specific",
+                "type": "object",
+                "additionalProperties: true
             }
         }
     }
