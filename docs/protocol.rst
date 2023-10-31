@@ -72,7 +72,7 @@ SeedLink commands consist of an ASCII string followed by zero or more arguments 
 
 The server MUST also accept a single <cr> or <lf> as a command terminator. Empty command lines MUST be ignored.
 
-All commands, except HELLO, INFO, GETCAPABILITIES, and END, MUST respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code and optionally error description on a single line, space separated. Error code is a single word with no spaces (:ref:`error-codes`). Error description is free UTF-8 text containing no <cr> or <lf>. The response MUST be terminated by ``<cr><lf>``.
+All commands, except HELLO, INFO, END and ENDFETCH, MUST respond with ``OK<cr><lf>`` if accepted by the server. If the command was not accepted, then the server MUST respond with ``ERROR`` followed by error code and optionally error description on a single line, space separated. Error code is a single word with no spaces (:ref:`error-codes`). Error description is free UTF-8 text containing no <cr> or <lf>. The response MUST be terminated by ``<cr><lf>``.
 
 In order to speed up handshaking, especially over high-latency links, the client MAY send next command before receiving response to previous one (asynchronous handshaking).
 
@@ -97,8 +97,6 @@ Example handshaking
     < OK
     > USERAGENT slinktool/4.3 libslink/2020.046
     < OK
-    > GETCAPABILITIES
-    < SLPROTO:4.0 TIME
     > AUTH johndoe letmein
     < ERROR AUTH authentication failed
     > STATION GE_APE
@@ -236,9 +234,6 @@ FETCH [*seq*]
 FETCH *seq* *start_time* [*end_time*] {CAP:TIME}
     same as DATA *seq* *start_time* [*end_time*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
 
-GETCAPABILITIES
-    returns space-separated server capabilities (:ref:`capabilities`) as a single line terminated by <cr><lf>.
-
 HELLO
     responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink vX.Y (implementation) ::``, where X.Y is the highest supported protocol version and *implementation* is software implementation and version, such as "MySeedLink/1.0". For each supported major protocol version, ``SLPROTO:A.B`` MUST be added (space separated), where A is the major version and B is the highest minor version. Lower minor versions are expected to be implicitly supported. Legacy capabilities may be added.
     
@@ -249,7 +244,7 @@ HELLO
     The second line contains station or data center description specified in the configuration. Handshaking SHOULD start with HELLO.
     
 INFO *item* [*station_pattern* [*stream_pattern*[.*format_subformat_pattern*]]]
-    requests information about the server in JSON format. *item* can be one of the following: ID, FORMATS, STATIONS, STREAMS, CONNECTIONS. *station_pattern* matches the station ID, *stream_pattern* matches the stream ID, *format_subformat_pattern* matches the combined format and subformat code (2 caracters). Supported wildcards are "\*" and "?".
+    requests information about the server in JSON format. *item* can be one of the following: ID, FORMATS, CAPABILITIES, STATIONS, STREAMS, CONNECTIONS. *station_pattern* matches the station ID, *stream_pattern* matches the stream ID, *format_subformat_pattern* matches the combined format and subformat code (2 caracters). Supported wildcards are "\*" and "?".
     
     The JSON schema is shown in Appendix B. INFO is allowed during both handshaking and data transfer phases. The response MUST be in form of one single packet with format code J. Subformat code MUST be I (successful request) or E (error). No ERROR response is allowed.
     
@@ -569,7 +564,7 @@ The following features were added or changed in SeedLink 4.
 * ISO8601-compatible date format of DATA and FETCH.
 * Optional end-time and sequence number (-1) with DATA and FETCH.
 * Sequence number as an argument to DATA and FETCH is written in decimal notation instead of hexadecimal.
-* AUTH, GETCAPABILITIES, SLPROTO and USERAGENT commands added.
+* AUTH, SLPROTO and USERAGENT commands added.
 * INFO FORMATS.
 * INFO format is JSON instead of XML.
 * Extended ERROR response.
@@ -583,7 +578,6 @@ Command           Reason of removal
 BATCH             similar functionality provided by asynchronous handshaking
 CAPABILITIES      similar functionality provided by SLPROTO
 CAT               same functionality provided by "INFO STATIONS"
-INFO CAPABILITIES same functionality provided by GETCAPABILITIES
 INFO GAPS         incompatible with unsorted data packets, performance issues
 TIME              same functionality provided by extended DATA syntax
 ================= ===========================================================
