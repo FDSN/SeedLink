@@ -340,6 +340,9 @@ ARGUMENTS
 AUTH
     authentication failed (invalid user, password or token were provided)
 
+INTERNAL
+    internal error
+
 .. _capabilities:
 
 Capabilities
