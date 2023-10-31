@@ -32,6 +32,8 @@ Authentication
 --------------
 Users MAY be authenticated using AUTH command. Access to some stations MAY be restricted to selected users. If a user does not have access to a station, then all commands SHOULD behave as if the station does not exist.
 
+Implementation MAY ban connections after repeated AUTH failures.
+
 Data formats
 ------------
 The payload of a SeedLink packet is usually a miniSEED record, but other formats are possible, as long as they include time and stream identification and are supported by the server and client. Format of the payload is determined by a format code and subformat code in packet header. Some codes are reserved for frequently used formats, rest can be dynamically assigned. The list of data formats supported by the server can be requested with "INFO FORMATS".
