@@ -200,7 +200,7 @@ AUTH *type* *argument*... {CAP:AUTH}
     
         > AUTH USERPASS johndoe letmein
         
-    Type TOKEN is reserved, but not specified. Additional types may be added in future revisions of this specification.
+    If type is JWT, then argument is JSON Web Token as specified by RFC 7519. Additional types may be added in future revisions of this specification.
 
 BYE
     tells the server to close connection. Using this command is OPTIONAL.
