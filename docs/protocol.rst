@@ -174,7 +174,7 @@ Data format and subformat codes MUST be single ASCII characters in the range of 
 
 Remaining codes can be assigned dynamically. A client SHOULD look up MIME type with INFO (e.g., "INFO FORMATS") before using format codes.
 
-In "dial-up mode" (FETCH command), only queued data is transferred. When transferring packets of all requested stations has completed, the server MUST append ASCII string ``END`` (without <cr><lf>) to the last packet and wait for the client to close connection. It is not allowed to send more data from server to client after END has been sent. Any commands except BYE MUST be ignored by the server. If the client does not close connection during reasonable time period after receiving END, then the connection MAY be closed by the server. 
+In “dial-up mode” (ENDFETCH command), only queued data is transferred. When the transfer of all packets for all requested stations has completed, the server MUST send the ASCII string END (without <cr><lf>) after the last packet. The server MUST NOT send data packets to the client after END has been sent. Any commands except BYE MUST be ignored by the server. If the client does not close connection shortly after receiving END, then the connection MAY be closed by the server.
 
 In "real-time mode" (DATA command), the data transfer phase never ends unless the client aborts the connection or a network error occurs.
 
