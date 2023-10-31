@@ -42,6 +42,8 @@ Station ID and stream ID
 ------------------------
 Each packet has a station ID and stream ID. Station ID is included in the SeedLink header while stream ID is derived from payload programmatically. In case of miniSEED 2.x and miniSEED 3.x (with FDSN source identifier), station ID is expected to be in form of NET_STA, where NET is network code and STA is station code, and stream ID is expected be in form of LOC_B_S_SS, where LOC is location code, B is band code, S is source code and SS is subsource code.
 
+Station ID and stream ID are agnostic to other standards, and the miniSEED identifiers are the expected use case with those data payloads but others may be used in the future, or within closed ecosystems.
+
 Pattern matching
 ----------------
 STATION, SELECT and INFO commands match against station ID, stream ID and combined data format and subformat code. Supported metacharacters are "\*" (matching any number of characters) and "?" (matching a single character). In case of station and stream ID, the pattern is anchored to the beginning and end of string. For example "\_\*Z" matches "_B_H_Z", but not "00_B_H_Z" or "_B_Z_H".
