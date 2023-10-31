@@ -252,6 +252,32 @@ INFO *item* [*station_pattern* [*stream_pattern*[.*format_subformat_pattern*]]]
     
     "INFO ID" is recommended for implementing keep-alive functionality.
 
+    The following table shows where *station_pattern*, *stream_pattern* and *format_subformat_pattern* apply:
+
+    +--------------+-------------------+------------------+----------------------------+
+    |              | *station_pattern* | *stream_pattern* | *format_subformat_pattern* |
+    +--------------+-------------------+------------------+----------------------------+
+    | ID           |       (-)         |       (-)        |            (-)             |
+    +--------------+-------------------+------------------+----------------------------+
+    | FORMATS      |       (-)         |       (-)        |            (-)             |
+    +--------------+-------------------+------------------+----------------------------+
+    | CAPABILITIES |       (-)         |       (-)        |            (-)             |
+    +--------------+-------------------+------------------+----------------------------+
+    | STATIONS     |       (+)         |       (*)        |            (*)             |
+    +--------------+-------------------+------------------+----------------------------+
+    | STREAMS      |       (+)         |       (+)        |            (+)             |
+    +--------------+-------------------+------------------+----------------------------+
+    | CONNECTIONS  |       (*)         |       (*)        |            (*)             |
+    +--------------+-------------------+------------------+----------------------------+
+
+    (-) Does not apply  (+) Applies  (*) Implementation dependent
+
+    In case of STATIONS, the server MAY support *stream_pattern* and *format_subformat_pattern* to show only stations whose data includes matching streams and formats.
+
+    In case of CONNECTIONS, the server MAY support *station_pattern*, *stream_pattern* and *format_subformat_pattern* to show connections that transfer matching stations, streams and formats.
+
+    *station_pattern*, *stream_pattern* and *format_subformat_pattern* are ignored when they do not apply.
+
 SELECT [!]*stream_pattern*[.*format_subformat_pattern*][:*filter*]...
     selects given streams of a station. By default (if SELECT is omitted), all streams are requested.
 
