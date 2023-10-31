@@ -196,7 +196,7 @@ All commands are case-insensitive. Maximum length of the command line is 255 cha
 Square brackets denote optional parts. Ellipsis denotes a list of one or more items.
 
 AUTH *type* *argument*... {CAP:AUTH}
-    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed, "ERROR UNSUPPORTED" if command or *type* is not supported or "ERROR UNEXPECTED" if AUTH is supported, but connection is unencrypted. Authentication over unencrypted connection MUST NOT be allowed.
+    authenticates a user. Successful authentication un-hides restricted stations/streams that the user is authorized to access. Responds with "OK" if authentication was successful, "ERROR AUTH" (see :ref:`error-codes`) if authentication failed or "ERROR UNSUPPORTED" if command or *type* is not supported.
     
     Regardless if authentication is successful or not, access to non-restricted stations MUST be granted.
     
