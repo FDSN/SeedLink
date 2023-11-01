@@ -174,9 +174,9 @@ Data format and subformat codes MUST be single ASCII characters in the range of 
 
 Remaining codes can be assigned dynamically. A client SHOULD look up MIME type with INFO (e.g., "INFO FORMATS") before using format codes.
 
-In “dial-up mode” (ENDFETCH command), only queued data is transferred. When the transfer of all packets for all requested stations has completed, the server MUST send the ASCII string END (without <cr><lf>) after the last packet. The server MUST NOT send data packets to the client after END has been sent. Any commands except BYE MUST be ignored by the server. If the client does not close connection shortly after receiving END, then the connection MAY be closed by the server.
+In “dial-up mode” (ENDFETCH command), only queued data is transferred. When the transfer of all packets for all requested stations has completed, the server MUST send the ASCII string ``END`` (without <cr><lf>) after the last packet. The server MUST NOT send data packets to the client after END has been sent. Any commands except BYE MUST be ignored by the server. If the client does not close connection shortly after receiving END, then the connection MAY be closed by the server.
 
-In "real-time mode" (DATA command), the data transfer phase never ends unless the client aborts the connection or a network error occurs.
+In "real-time mode" (END command), the data transfer phase never ends unless the client aborts the connection or a network error occurs.
 
 .. _seedlink-commands:
 
@@ -226,13 +226,10 @@ DATA *seq* *start_time* [*end_time*] {CAP:TIME}
     Using *seq*, it is possible to resume transfer of a time window in a new session.
 
 END
-    ends handshaking and switches to data transfer phase.
+    ends handshaking and switches to data transfer phase in real-time mode.
 
-FETCH [*seq*]
-    same as DATA [*seq*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
-
-FETCH *seq* *start_time* [*end_time*] {CAP:TIME}
-    same as DATA *seq* *start_time* [*end_time*], except transfer of packets stops when all queued data of the station(s) have been transferred ("dial-up mode").
+ENDFETCH
+    ends handshaking and switches to data transfer phase in dial-up mode.
 
 HELLO
     responds with a two-line message (both lines terminated with <cr><lf>). For compatibility reasons, the first line MUST start with ``SeedLink vX.Y (implementation) ::``, where X.Y is the highest supported protocol version and *implementation* is software implementation and version, such as "MySeedLink/1.0". For each supported major protocol version, ``SLPROTO:A.B`` MUST be added (space separated), where A is the major version and B is the highest minor version. Lower minor versions are expected to be implicitly supported. Legacy capabilities may be added.
@@ -315,13 +312,13 @@ SLPROTO *version*
 STATION *station_pattern*
     requests stations that match given pattern.
 
-    *station_pattern* matches the station ID. Supported wildcards are "\*" and "?". Any following SELECT, DATA, or FETCH commands apply to all stations that match the given pattern, including stations that are added to the server in the future.
+    *station_pattern* matches the station ID. Supported wildcards are "\*" and "?". Any following SELECT and DATA commands apply to all stations that match the given pattern, including stations that are added to the server in the future.
     
     Stations that already matched a previous STATION command are excluded.
 
     The number of station requests MAY be limited by the server to prevent excessive resource consumption.
     
-    STATION may return ERROR for any implementation-defined reason. In this case, SELECT, DATA and FETCH commands up to next STATION must be ignored.
+    STATION may return ERROR for any implementation-defined reason. In this case, SELECT and DATA commands up to next STATION must be ignored.
     
     Available station IDs can be requested with "INFO STATIONS". In case of miniSEED 2.x and miniSEED 3.x (with FDSN source identifier), the format of station ID is NET_STA, where NET is network code and STA is station code.
     
@@ -383,7 +380,7 @@ AUTH\:*type*
     authentication *type* supported.
 
 TIME
-    time windows supported with DATA and FETCH.
+    time windows supported with DATA.
 
 .. _websocket:
 
@@ -592,9 +589,9 @@ The following features were added or changed in SeedLink 4.
 * STATION takes a single station ID argument and supports wildcards.
 * Different SELECT syntax, wildcard "\*" supported.
 * 64-bit sequence numbers.
-* ISO8601-compatible date format of DATA and FETCH.
-* Optional end-time and sequence number (-1) with DATA and FETCH.
-* Sequence number as an argument to DATA and FETCH is written in decimal notation instead of hexadecimal.
+* ISO8601-compatible date format.
+* Optional end-time and sequence number (-1).
+* Sequence number is written in decimal notation instead of hexadecimal.
 * AUTH, SLPROTO and USERAGENT commands added.
 * INFO FORMATS.
 * INFO format is JSON instead of XML.
