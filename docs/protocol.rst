@@ -160,7 +160,7 @@ In general case, a client must remember the current sequence number of each stat
     A: S1 S2 | S3 S4 ...
     B: S3 S4 | S5 S6 ...
 
-The connection again breaks after 2 packets of each station (A:S1, A:S2, B:S3, B:S4) have been sent, but we cannot use a single sequence number to resume all stations from the correct packet. In order to resume the connection, we need the current sequence number of each station:
+The connection again breaks after 2 packets of each station (A:S1, A:S2, B:S3, B:S4) have been sent, but we cannot use a single sequence number to resume all stations from the correct packet. In order to resume the connection, we need the current sequence number of each known station. Finally we use the wildcard to request data of any additional stations that are not known yet.
 
 ::
 
@@ -168,6 +168,8 @@ The connection again breaks after 2 packets of each station (A:S1, A:S2, B:S3, B
     > DATA 3
     > STATION B
     > DATA 5
+    > STATION *
+    > DATA
     > END
 
     A: S3 S4 S5 S6 ...
