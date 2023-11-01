@@ -123,6 +123,56 @@ Example handshaking
     < OK
     > END
 
+Since stations that already matched a previous STATION command are excluded, `STATION GE_*` means any station of GE network *except* APE and WLF.
+
+Reconnection
+^^^^^^^^^^^^
+A client can use sequence numbers to resume broken connection without data loss. Some servers may use a single sequence number space that is shared by all stations within the server; in this case a client can use sequence numbers together with station wildcards as illustrated below.
+
+::
+
+    > STATION *
+    > DATA
+    > END
+
+    A: S1 S3 | S5 S7 ...
+    B: S2 S4 | S6 S8 ...
+
+The server has 2 stations: A and B. The connection breaks after 2 packets of each station (A:S1, B:S2, A:S3 and B:S4) have been sent. We can now resume the connection using the following commands:
+
+::
+
+    > STATION *
+    > DATA 5
+    > END
+
+    A: S5 S7 S9 S11...
+    B: S6 S8 S10 S12...
+
+In general case, a client must remember the current sequence number of each station to resume a connection. This is illustrated below.
+
+::
+
+    > STATION *
+    > DATA
+    > END
+
+    A: S1 S2 | S3 S4 ...
+    B: S3 S4 | S5 S6 ...
+
+The connection again breaks after 2 packets of each station (A:S1, A:S2, B:S3, B:S4) have been sent, but we cannot use a single sequence number to resume all stations from the correct packet. In order to resume the connection, we need the current sequence number of each station:
+
+::
+
+    > STATION A
+    > DATA 3
+    > STATION B
+    > DATA 5
+    > END
+
+    A: S3 S4 S5 S6 ...
+    B: S5 S6 S7 S8 ...
+
 Data Transfer
 -------------
 
