@@ -305,20 +305,22 @@ INFO *item* [*station_pattern* [*stream_pattern*[.*format_subformat_pattern*]]]
     +--------------+-------------------+------------------+----------------------------+
     |              | *station_pattern* | *stream_pattern* | *format_subformat_pattern* |
     +--------------+-------------------+------------------+----------------------------+
-    | ID           |       (-)         |       (-)        |            (-)             |
+    | ID           |        \-         |        \-        |             \-             |
     +--------------+-------------------+------------------+----------------------------+
-    | FORMATS      |       (-)         |       (-)        |            (-)             |
+    | FORMATS      |        \-         |        \-        |             \-             |
     +--------------+-------------------+------------------+----------------------------+
-    | CAPABILITIES |       (-)         |       (-)        |            (-)             |
+    | CAPABILITIES |        \-         |        \-        |             \-             |
     +--------------+-------------------+------------------+----------------------------+
-    | STATIONS     |       (+)         |       (*)        |            (*)             |
+    | STATIONS     |        \+         |        \*        |             \*             |
     +--------------+-------------------+------------------+----------------------------+
-    | STREAMS      |       (+)         |       (+)        |            (+)             |
+    | STREAMS      |        \+         |        \+        |             \+             |
     +--------------+-------------------+------------------+----------------------------+
-    | CONNECTIONS  |       (*)         |       (*)        |            (*)             |
+    | CONNECTIONS  |        \*         |        \*        |             \*             |
     +--------------+-------------------+------------------+----------------------------+
 
-    (-) Does not apply  (+) Applies  (*) Implementation dependent
+    | \- Does not apply
+    | \+ Applies
+    \* Implementation dependent
 
     In case of STATIONS, the server MAY support *stream_pattern* and *format_subformat_pattern* to show only stations whose data includes matching streams and formats.
 
