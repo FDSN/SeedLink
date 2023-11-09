@@ -435,6 +435,9 @@ AUTH\:*type*
 TIME
     time windows supported with DATA.
 
+SEQWILDCARD
+    sequence numbers can be used with station wildcards.
+
 .. _websocket:
 
 Appendix A. WebSocket operation
