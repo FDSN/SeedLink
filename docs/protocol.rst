@@ -260,15 +260,15 @@ BYE
     tells the server to close connection. Using this command is OPTIONAL.
 
 DATA [*seq* [*start_time* [*end_time*]]]
-    sets the starting sequence number of station(s) that match previous STATION command. *seq* is a decimal integer in ASCII coding. If *seq* is ``NEXT`` or omitted, then transfer starts from the next available packet. If the sequence number is in the future or too distant past, then it MAY be considered invalid by the server and ``NEXT`` MAY be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
+    sets the starting sequence number of station(s) that match previous STATION command. *seq* is a decimal integer in ASCII coding. If *seq* is omitted, then transfer starts from the next available packet. If *seq* is in the future or too distant past, then it MAY be considered invalid by the server and the sequence number of the next available packet may be used instead. If a packet with given sequence number is not available, then the sequence number of the next available packet MUST be used by the server. Transfer of packets continues in real-time when all queued data of the station(s) have been transferred ("real-time mode").
 
-    In dial-up mode (ENDFETCH command), using ``NEXT`` MAY return data if next packets arrive within a certain small time period.
+    In dial-up mode (ENDFETCH command), if the sequence number is omitted, the server MAY return data if next packets arrive within a certain small time period.
 
     If *seq* is ``ALL``, transfer starts from the earliest available packet.
 
     *start_time* and *end_time* can be used when server has the TIME capability. In this case, only packets that satisfy the following conditions are considered:
 
-    #. packet.seq >= *seq* (if *seq* != ``NEXT``)
+    #. packet.seq >= *seq* (if *seq* != ``ALL``)
     #. packet.start_time < *end_time* (if *end_time* given)
     #. packet.end_time > *start_time*
 
