@@ -646,7 +646,7 @@ The following features were added or changed in SeedLink 4.
 * Different SELECT syntax, wildcard "\*" supported.
 * 64-bit sequence numbers.
 * ISO8601-compatible date format.
-* Optional end-time and sequence number (``NEXT``).
+* DATA extended to support time window request with optional sequence number.
 * Sequence number is written in decimal notation instead of hexadecimal.
 * AUTH, SLPROTO and USERAGENT commands added.
 * INFO FORMATS.
