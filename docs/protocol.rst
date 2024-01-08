@@ -547,6 +547,13 @@ In case of error, only the "error" property is returned in addition to required 
                     }
                 }
             },
+            "capability": {
+                "description": "List of capabilities supported by the server",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
             "station": {
                 "type": "array",
                 "items": {
