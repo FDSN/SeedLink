@@ -31,14 +31,14 @@
         {
             "id": "GE_APE",
             "description": "GEOFON Station Apirathos, Naxos",
-            "begin_seq": 3497286,
+            "start_seq": 3497286,
             "end_seq": 3507286,
             "stream": [
                 {
                     "id": "_B_H_Z",
                     "format": "2",
                     "subformat": "D",
-                    "begin_time": "2021-07-25T17:48:11.775Z",
+                    "start_time": "2021-07-25T17:48:11.775Z",
                     "end_time": "2021-07-25T19:14:06.275Z"
                 }
             ]
