@@ -235,7 +235,7 @@ In "real-time mode" (END command), the data transfer phase never ends unless the
 Commands
 --------
 
-All of the following commands are mandatory in version 4, except when marked with {CAP:*}. In the latter case, the command is supported if the server implements indicated capability.
+All of the following commands are mandatory in version 4, except when marked with {CAP:\*}. In the latter case, the command is supported if the server implements indicated capability.
 
 Where a command allows or requires additional arguments, there MUST be simple white space between the command and its argument or arguments. Simple whitespace is one or more space (ASCII code 32) or horizontal tab (ASCII code 9) characters.
 
@@ -320,7 +320,7 @@ INFO *item* [*station_pattern* [*stream_pattern*[.*format_subformat_pattern*]]]
 
     | \- Does not apply
     | \+ Applies
-    \* Implementation dependent
+    | \* Implementation dependent
 
     In case of STATIONS, the server MAY support *stream_pattern* and *format_subformat_pattern* to show only stations whose data includes matching streams and formats.
 
@@ -378,15 +378,14 @@ STATION *station_pattern*
     Example:
         * request GE_WLF and select streams with band code B;
         * request stations whose station code ends with "F" (except GE_WLF) and select streams with either band code B or source code B;
-        * request stations whose network code starts with "G" (except GE_WLF and stations whose station code ends with "F") and select streams whose band code, source code or subsource code starts with B:
-    ::
+        * request stations whose network code starts with "G" (except GE_WLF and stations whose station code ends with "F") and select streams whose band code, source code or subsource code starts with B::
     
-        > STATION GE_WLF
-        > SELECT *_B_*_*
-        > STATION *F
-        > SELECT *_B_*
-        > STATION G*
-        > SELECT *_B*
+            > STATION GE_WLF
+            > SELECT *_B_*_*
+            > STATION *F
+            > SELECT *_B_*
+            > STATION G*
+            > SELECT *_B*
         
 USERAGENT program_or_library/version...
     optionally identifies client software used. Argument is expected to be a space-separated list of ``program_or_library/version``. No spaces are allowed within individual items. For example when someone embeds slarchive into a larger framework, the USERAGENT can identify the wrapper system, slarchive and the library as::
@@ -472,171 +471,8 @@ The response of "INFO CONNECTIONS" is implementation defined and is not included
 
 In case of error, only the "error" property is returned in addition to required properties.
 
-::
-
-    {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "description": "SeedLink v4 INFO schema",
-        "type": "object",
-        "required": [
-            "software",
-            "organization"
-        ],
-        "properties": {
-            "software": {
-                "description": "Software ID as in HELLO response",
-                "type": "string"
-            },
-            "organization": {
-                "description": "Station or data center description as in HELLO response",
-                "type": "string"
-            },
-            "error": {
-                "type": "object",
-                "required": [
-                    "code",
-                    "message"
-                ],
-                "properties": {
-                    "code": {
-                        "description": "Error code",
-                        "type": "string"
-                    },
-                    "message": {
-                        "description": "Error message",
-                        "type": "string"
-                    }
-                }
-            },
-            "format": {
-                "description": "Dictionary of formats supported by the server",
-                "type": "object",
-                "patternProperties": {
-                    "^[A-Z0-9]$": {
-                        "type": "object",
-                        "required": [
-                            "mimetype",
-                            "subformat"
-                        ],
-                        "properties": {
-                            "mimetype": {
-                                "description": "MIME type of format",
-                                "type": "string"
-                            },
-                            "subformat": {
-                                "type": "object",
-                                "minProperties": 1,
-                                "patternProperties": {
-                                    "^[A-Z0-9]$": {
-                                        "description": "Description of subformat",
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "filter": {
-                "description": "Dictionary of filters supported by the server",
-                "type": "object",
-                "patternProperties": {
-                    "^[A-Z0-9]$": {
-                        "description": "Description of filter",
-                        "type": "string"
-                    }
-                }
-            },
-            "capability": {
-                "description": "List of capabilities supported by the server",
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            },
-            "station": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "required": [
-                        "id",
-                        "description",
-                        "start_seq",
-                        "end_seq",
-                    ],
-                    "properties": {
-                        "id": {
-                            "description": "Station ID",
-                            "type": "string"
-                        },
-                        "description": {
-                            "description": "Station description",
-                            "type": "string"
-                        },
-                        "start_seq": {
-                            "description": "First sequence number available",
-                            "type": "integer"
-                        },
-                        "end_seq": {
-                            "description": "Next sequence number (last sequence number available + 1)",
-                            "type": "integer"
-                        },
-                        "backfill": {
-                            "description": "How many seconds to wait for gaps to fill: -1 = undefined, 0 = data is strictly in time order",
-                            "type": "integer"
-                        },
-                        "stream": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "required": [
-                                    "id",
-                                    "format",
-                                    "subformat",
-                                    "start_time",
-                                    "end_time"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "description": "Stream ID",
-                                        "type": "string"
-                                    },
-                                    "format": {
-                                        "description": "Stream format",
-                                        "type": "string",
-                                        "pattern": "^[A-Z0-9]$"
-                                    },
-                                    "subformat": {
-                                        "description": "Stream subformat",
-                                        "type": "string",
-                                        "pattern": "^[A-Z0-9]$"
-                                    },
-                                    "origin": {
-                                        "description": "Origin of stream",
-                                        "type": "string",
-                                        "enum": ["native", "converted"],
-                                    },
-                                    "start_time": {
-                                        "description": "Start time of the first packet in the ringbuffer",
-                                        "type": "string"
-                                    },
-                                    "end_time": {
-                                        "description": "End time of the last packet in the ringbuffer",
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "connections": {
-                "description": "Connections to the server. Contents are implementation specific",
-                "type": "object",
-                "additionalProperties: true
-            }
-        }
-    }
+.. literalinclude:: seedlink.schema.json
+   :language: JSON
 
 
 Appendix C. Differences between SeedLink 3 and SeedLink 4

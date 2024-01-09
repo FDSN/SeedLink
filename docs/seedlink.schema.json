@@ -61,6 +61,23 @@
                 }
             }
         },
+        "filter": {
+            "description": "Dictionary of filters supported by the server",
+            "type": "object",
+            "patternProperties": {
+                "^[A-Z0-9]$": {
+                    "description": "Description of filter",
+                    "type": "string"
+                }
+            }
+        },
+        "capability": {
+            "description": "List of capabilities supported by the server",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "station": {
             "type": "array",
             "items": {
@@ -68,7 +85,7 @@
                 "required": [
                     "id",
                     "description",
-                    "begin_seq",
+                    "start_seq",
                     "end_seq"
                 ],
                 "properties": {
@@ -80,12 +97,16 @@
                         "description": "Station description",
                         "type": "string"
                     },
-                    "begin_seq": {
+                    "start_seq": {
                         "description": "First sequence number available",
                         "type": "integer"
                     },
                     "end_seq": {
                         "description": "Next sequence number (last sequence number available + 1)",
+                        "type": "integer"
+                    },
+                    "backfill": {
+                        "description": "How many seconds to wait for gaps to fill: -1 = undefined, 0 = data is strictly in time order",
                         "type": "integer"
                     },
                     "stream": {
@@ -96,7 +117,7 @@
                                 "id",
                                 "format",
                                 "subformat",
-                                "begin_time",
+                                "start_time",
                                 "end_time"
                             ],
                             "properties": {
@@ -114,7 +135,12 @@
                                     "type": "string",
                                     "pattern": "^[A-Z0-9]$"
                                 },
-                                "begin_time": {
+                                "origin": {
+                                    "description": "Origin of stream",
+                                    "type": "string",
+                                    "enum": ["native", "converted"]
+                                },
+                                "start_time": {
                                     "description": "Start time of the first packet in the ringbuffer",
                                     "type": "string"
                                 },
@@ -127,6 +153,11 @@
                     }
                 }
             }
+        },
+        "connections": {
+            "description": "Connections to the server. Contents are implementation specific",
+            "type": "object",
+            "additionalProperties": true
         }
     }
 }
