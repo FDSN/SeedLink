@@ -19,12 +19,12 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'SeedLink'
-copyright = '2021, International FDSN'
+copyright = '2024, International FDSN'
 author = 'FDSN'
 
 # The full version, including alpha/beta/rc tags
 release = '4.0.0'
-version = '4.0.0 DRAFT'
+version = '4.0.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -78,7 +78,7 @@ html_js_files = [
 ]
 
 # Mark as draft, disable for releases
-sphinxmark_enable = True
+sphinxmark_enable = False
 
 # Sphinxmark options, 'document' is the div for the RTD theme body
 sphinxmark_div = 'document'
