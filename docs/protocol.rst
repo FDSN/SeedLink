@@ -97,7 +97,7 @@ Example handshaking
     < OK
     > USERAGENT slinktool/4.3 libslink/2020.046
     < OK
-    > AUTH johndoe letmein
+    > AUTH USERPASS johndoe letmein
     < ERROR AUTH authentication failed
     > STATION GE_APE
     < OK
