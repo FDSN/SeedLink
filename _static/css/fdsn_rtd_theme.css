@@ -13,6 +13,7 @@ body {
 .wy-side-nav-search,
 .wy-side-nav-search > a,
 .wy-side-nav-search > div.version,
+.wy-side-nav-search > div.version-switch,
 .wy-nav-top {
   color: black;
   background: white;
