@@ -13,10 +13,13 @@ body {
 .wy-side-nav-search,
 .wy-side-nav-search > a,
 .wy-side-nav-search > div.switch-menus > div.version-switch select,
+.wy-side-nav-search > div.switch-menus > div.version-switch select:focus,
+.wy-side-nav-search > div.switch-menus > div.version-switch select:active,
 .wy-nav-top {
   color: black;
   background: white;
 }
+
 
 .wy-side-nav-search > div.switch-menus > div.version-switch select:hover {
   color: black;
