@@ -10,8 +10,8 @@ The documentation may be found at: https://docs.fdsn.org/projects/seedlink/
 ## Documentation source organization
 
 * The `draft` branch contains the latest draft documentation. All changes are first applied to
-  this branch for review and merged with main for releases
-* Specification releases are tags in the form `v.#.#-d#` on the `main` branch, following a release:
+  this branch for review and merged with main for releases.
+* Specification releases are tags in the form `v.#.#-d#`.
 
 ## Versioning
 
