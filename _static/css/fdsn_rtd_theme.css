@@ -12,8 +12,8 @@ body {
 /* Set colors for search and navigation sidebar */
 .wy-side-nav-search,
 .wy-side-nav-search > a,
-.wy-side-nav-search > div.version,
-.wy-side-nav-search > div.version-switch,
+.wy-side-nav-search > div.switch-menus > div.language-switch select,
+.wy-side-nav-search > div.switch-menus > div.version-switch select,
 .wy-nav-top {
   color: black;
   background: white;
