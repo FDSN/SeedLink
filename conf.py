@@ -13,8 +13,31 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import re
+import subprocess
 import sphinx_rtd_theme
 
+def get_git_version():
+    """Return the short and long versions from git describe or return unknown"""
+    try:
+        version = subprocess.check_output(["git", "describe", "--tags", "--always"]).strip().decode("utf-8")
+
+        # Extract only the first two version numbers (e.g., "1.2" from "v1.2.3")
+        match = re.match(r"v?(\d+\.\d+)", version)
+        short_version = match.group(1) if match else version  # Default to base_version if no match
+
+        return short_version, version
+    except Exception:
+        return "unknown"
+
+def get_git_branch():
+    """Return the current git branch name or empty string"""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+        ).strip().decode("utf-8")
+    except Exception:
+        return ""
 
 # -- Project information -----------------------------------------------------
 
@@ -22,9 +45,8 @@ project = 'SeedLink'
 copyright = '2024, International FDSN'
 author = 'FDSN'
 
-# The full version, including alpha/beta/rc tags
-release = '4.0.0'
-version = '4.0.0'
+# Set the short (major.minor) version and full release values
+version, release = get_git_version()
 
 # -- General configuration ---------------------------------------------------
 
@@ -36,7 +58,6 @@ master_doc = 'index'
 # ones.
 extensions = [
   'sphinx_rtd_theme',
-  'sphinxmark',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -77,8 +98,8 @@ html_js_files = [
   'js/sidebar_context.js'
 ]
 
-# Mark as draft, disable for releases
-sphinxmark_enable = False
-
-# Sphinxmark options, 'document' is the div for the RTD theme body
-sphinxmark_div = 'document'
+# Enable sphinxmark only if on the draft branch
+if get_git_branch() == "draft":
+    extensions.append("sphinxmark")
+    sphinxmark_enable = True
+    sphinxmark_div = "document"
