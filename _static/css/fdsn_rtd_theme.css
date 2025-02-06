@@ -12,18 +12,22 @@ body {
 /* Set colors for search and navigation sidebar */
 .wy-side-nav-search,
 .wy-side-nav-search > a,
-.wy-side-nav-search > div.switch-menus > div.language-switch select,
 .wy-side-nav-search > div.switch-menus > div.version-switch select,
 .wy-nav-top {
   color: black;
   background: white;
 }
 
+.wy-side-nav-search > div.switch-menus > div.version-switch select option:hover {
+  color: black;
+  font-weight: bold;
+}
+
 .wy-menu-vertical header,
 .wy-menu-vertical p.caption {
   color: lightgray;
   font-weight: bolder;
-}
+}fd
 
 .wy-menu-vertical a,
 .wy-menu-vertical li.current > a {
