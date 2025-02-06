@@ -18,7 +18,7 @@ body {
   background: white;
 }
 
-.wy-side-nav-search > div.switch-menus > div.version-switch select option:hover {
+.wy-side-nav-search > div.switch-menus > div.version-switch select:hover {
   color: black;
   font-weight: bold;
 }
